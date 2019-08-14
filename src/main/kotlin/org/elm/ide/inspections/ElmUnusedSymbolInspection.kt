@@ -72,7 +72,7 @@ class ElmUnusedSymbolInspection : ElmLocalInspection() {
 
 
 private fun ElmFunctionDeclarationLeft.isElmTestEntryPoint(): Boolean {
-    val decl = parentOfType<ElmValueDeclaration>() ?: return false
+    val decl = parentOfType<ElmValueDeclarationOld>() ?: return false
     if (!decl.isTopLevel) return false
     val typeAnnotation = decl.typeAnnotation ?: return false
 

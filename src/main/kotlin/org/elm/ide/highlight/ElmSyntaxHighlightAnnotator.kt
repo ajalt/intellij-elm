@@ -17,7 +17,7 @@ class ElmSyntaxHighlightAnnotator : Annotator {
 
     private fun AnnotationHolder.highlight(element: PsiElement) {
         when (element) {
-            is ElmValueDeclaration -> valueDeclaration(element)
+            is ElmValueDeclarationOld -> valueDeclaration(element)
             is ElmTypeAnnotation -> typeAnnotation(element)
             is ElmUpperCaseQID -> upperCaseQID(element)
             is ElmField -> field(element.lowerCaseIdentifier)
@@ -55,7 +55,7 @@ class ElmSyntaxHighlightAnnotator : Annotator {
         }
     }
 
-    private fun AnnotationHolder.valueDeclaration(declaration: ElmValueDeclaration) {
+    private fun AnnotationHolder.valueDeclaration(declaration: ElmValueDeclarationOld) {
         declaration.declaredNames(includeParameters = false).forEach {
             applyColor(it.nameIdentifier, ElmColor.DEFINITION_NAME)
         }

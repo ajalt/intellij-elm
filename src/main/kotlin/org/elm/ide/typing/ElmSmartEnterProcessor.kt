@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiWhiteSpace
-import com.intellij.util.DocumentUtil
 import org.elm.ide.inspections.MissingCaseBranchAdder
 import org.elm.lang.core.psi.*
 import org.elm.lang.core.psi.ElmTypes.*
@@ -48,7 +47,7 @@ class ElmSmartEnterProcessor : SmartEnterProcessorWithFixers() {
                             || it is ElmCaseOfExpr
                             || it is ElmLetInExpr
                             || it is ElmIfElseExpr
-                            || it is ElmValueDeclaration
+                            || it is ElmValueDeclarationOld
                 }
     }
 }
@@ -72,7 +71,7 @@ private class ElmEnterProcessor : SmartEnterProcessorWithFixers.FixEnterProcesso
                 atCaret.thenKeywords.last()
             }
             indentAfterElement(editor, anchor, atCaret.elseKeywords.last())
-        } else if (modified && atCaret is ElmValueDeclaration && atCaret.eqElement != null) {
+        } else if (modified && atCaret is ElmValueDeclarationOld && atCaret.eqElement != null) {
             indentAfterElement(editor, atCaret.eqElement!!, atCaret)
         } else {
             plainEnter(editor)

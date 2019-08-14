@@ -6,7 +6,7 @@ import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.PsiTreeUtil
 import org.elm.lang.core.psi.*
 import org.elm.lang.core.psi.ElmTypes.OPERATOR_IDENTIFIER
-import org.elm.lang.core.stubs.ElmOperatorDeclarationLeftStub
+import org.elm.lang.core.stubs.ElmOperatorDeclarationStub
 
 // TODO [drop 0.18] delete this entire file
 
@@ -17,12 +17,12 @@ import org.elm.lang.core.stubs.ElmOperatorDeclarationLeftStub
  *
  * @see [ElmFunctionDeclarationLeft]
  */
-class ElmOperatorDeclarationLeft : ElmStubbedNamedElementImpl<ElmOperatorDeclarationLeftStub>, ElmExposableTag, ElmValueAssigneeTag {
+class ElmOperatorDeclarationLeft : ElmStubbedNamedElementImpl<ElmOperatorDeclarationStub>, ElmExposableTag, ElmValueAssigneeTag {
 
     constructor(node: ASTNode) :
             super(node, IdentifierCase.OPERATOR)
 
-    constructor(stub: ElmOperatorDeclarationLeftStub, stubType: IStubElementType<*, *>) :
+    constructor(stub: ElmOperatorDeclarationStub, stubType: IStubElementType<*, *>) :
             super(stub, stubType, IdentifierCase.OPERATOR)
 
 

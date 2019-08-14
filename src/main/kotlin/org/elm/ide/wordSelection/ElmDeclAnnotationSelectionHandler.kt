@@ -5,11 +5,11 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import org.elm.lang.core.psi.elements.ElmTypeAnnotation
-import org.elm.lang.core.psi.elements.ElmValueDeclaration
+import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
 import org.elm.lang.core.psi.parentOfType
 
 /**
- * Adjusts the 'extend selection' behavior for [ElmValueDeclaration] and [ElmTypeAnnotation] so that they
+ * Adjusts the 'extend selection' behavior for [ElmValueDeclarationOld] and [ElmTypeAnnotation] so that they
  * mutually extend the selection to include the other.
  */
 class ElmDeclAnnotationSelectionHandler : ExtendWordSelectionHandlerBase() {
@@ -47,11 +47,11 @@ class ElmDeclAnnotationSelectionHandler : ExtendWordSelectionHandlerBase() {
      */
 
     override fun canSelect(e: PsiElement): Boolean =
-            e is ElmValueDeclaration || e is ElmTypeAnnotation
+            e is ElmValueDeclarationOld || e is ElmTypeAnnotation
 
     override fun select(e: PsiElement, editorText: CharSequence, cursorOffset: Int, editor: Editor): List<TextRange>? {
         when (e) {
-            is ElmValueDeclaration -> {
+            is ElmValueDeclarationOld -> {
                 // extend the selection so that it also includes the preceding type annotation
                 val typeAnnotation = e.typeAnnotation ?: return null
                 val range = TextRange(typeAnnotation.textRange.startOffset, e.textRange.endOffset)
@@ -60,7 +60,7 @@ class ElmDeclAnnotationSelectionHandler : ExtendWordSelectionHandlerBase() {
             is ElmTypeAnnotation -> {
                 // extend the selection so that it also includes the function body
                 val targetDecl = e.reference.resolve() ?: return null
-                val valueDecl = targetDecl.parentOfType<ElmValueDeclaration>()!!
+                val valueDecl = targetDecl.parentOfType<ElmValueDeclarationOld>()!!
                 val range = TextRange(e.textRange.startOffset, valueDecl.textRange.endOffset)
                 return expandToWholeLine(editorText, range)
             }

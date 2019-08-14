@@ -27,7 +27,7 @@ class ElmFoldingBuilder : FoldingBuilderEx(), DumbAware {
                 else "{-...-}"
             }
             RECORD_EXPR, RECORD_TYPE -> "{...}"
-            TYPE_ALIAS_DECLARATION, TYPE_DECLARATION, VALUE_DECLARATION -> " = ..."
+            TYPE_ALIAS_DECLARATION, TYPE_DECLARATION, VALUE_DECLARATION, DESTRUCTURING_DECLARATION, OPERATOR_DECLARATION -> " = ..."
             else -> "..."
         }
     }
@@ -74,7 +74,7 @@ private class ElmFoldingVisitor : PsiElementVisitor() {
             is ElmRecordType, is ElmRecordExpr -> {
                 fold(element)
             }
-            is ElmValueDeclaration -> {
+            is ElmValueDeclarationOld -> {
                 foldToEnd(element) { functionDeclarationLeft ?: pattern ?: operatorDeclarationLeft }
             }
             is ElmTypeDeclaration -> {

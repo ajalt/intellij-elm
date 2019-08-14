@@ -6,51 +6,37 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.testFramework.utils.inlays.InlayHintsChecker.Companion.pattern
 import org.elm.ide.icons.ElmIcons
 import org.elm.lang.core.psi.*
-import org.elm.lang.core.stubs.ElmPlaceholderStub
+import org.elm.lang.core.psi.ElmTypes.*
+import org.elm.lang.core.stubs.ElmValueDeclarationStub
 
 
 /**
- * A top-level value/function declaration.
+ * A top-level value/function declaration and/or annotation.
  *
- * Most of the time this is a simple value or function declaration
- * e.g. `x = 42` or `f x = 2 * x`
- * That case is covered by [ElmFunctionDeclarationLeft].
- *
- * The other case, and it's quite rare, is when you are binding a value
- * to a pattern, possibly introducing multiple top-level names.
- * e.g. `(x,y) = (0,0)`
+ * e.g.
+ *  - `x = 42`
+ *  - `f x = 2 * x`
+ *  - `x : Int -> Int`
+ *  - ```
+ *    x : Int -> Int
+ *    x a = a
+ *    ```
  */
-class ElmValueDeclaration : ElmStubbedElement<ElmPlaceholderStub>, ElmDocTarget {
+class ElmValueDeclaration : ElmStubbedElement<ElmValueDeclarationStub>, ElmNameIdentifierOwner, ElmExposableTag, ElmDocTarget {
 
     constructor(node: ASTNode) :
             super(node)
 
-    constructor(stub: ElmPlaceholderStub, stubType: IStubElementType<*, *>) :
+    constructor(stub: ElmValueDeclarationStub, stubType: IStubElementType<*, *>) :
             super(stub, stubType)
 
     val modificationTracker = SimpleModificationTracker()
 
     override fun getIcon(flags: Int) =
             ElmIcons.FUNCTION
-
-    val functionDeclarationLeft: ElmFunctionDeclarationLeft?
-        get() = PsiTreeUtil.getStubChildOfType(this, ElmFunctionDeclarationLeft::class.java)
-
-    /** Warning: Elm 0.18 only! will always be null in 0.19 */
-    // TODO [drop 0.18] remove this property
-    val operatorDeclarationLeft: ElmOperatorDeclarationLeft?
-        get() = PsiTreeUtil.getStubChildOfType(this, ElmOperatorDeclarationLeft::class.java)
-
-    /** The pattern if this declaration is binding multiple names. */
-    // In Elm 0.19, this is only valid inside a let block
-    val pattern: ElmPattern?
-        get() = findChildByClass(ElmPattern::class.java)
-
-    /** The element on the left-hand side of the `=` */
-    val assignee: ElmValueAssigneeTag?
-        get() = PsiTreeUtil.getStubChildOfType(this, ElmValueAssigneeTag::class.java) ?: pattern
 
     /**
      * The 'body' of the declaration. This is the right-hand side which is bound
@@ -72,45 +58,65 @@ class ElmValueDeclaration : ElmStubbedElement<ElmPlaceholderStub>, ElmDocTarget 
      *                          (also includes destructured names). The default is `true`
      */
     fun declaredNames(includeParameters: Boolean = true): List<ElmNameIdentifierOwner> {
-        val namedElements = mutableListOf<ElmNameIdentifierOwner>()
-
-        if (functionDeclarationLeft != null) {
-            // the most common case, a named function or value declaration
-            namedElements.add(functionDeclarationLeft!!)
-            if (includeParameters)
-                namedElements.addAll(functionDeclarationLeft!!.namedParameters)
-
-        } else if (operatorDeclarationLeft != null) {
-            // an operator declaration
-            namedElements.add(operatorDeclarationLeft!!)
-            if (includeParameters)
-                namedElements.addAll(operatorDeclarationLeft!!.namedParameters)
-
-        } else if (pattern != null) {
-            // value destructuring assignment (e.g. `(x,y) = (0,0)` in a let/in declaration)
-            namedElements.addAll(pattern!!.descendantsOfType<ElmNameIdentifierOwner>())
-        }
-
-        return namedElements
+        return if (includeParameters) namedParameters + this
+        else listOf(this)
     }
 
-    /** The type annotation for this function, or `null` if there isn't one. */
-    val typeAnnotation: ElmTypeAnnotation?
-        get() {
-            // HACK: try to find the type annotation as best we can, keeping stub-safe.
-            // TODO [kl] Look into parsing the type annotation as part of the value declaration.
-            val fdl = functionDeclarationLeft
-            return if (stub != null && fdl != null) {
-                elmFile.getTypeAnnotations().firstOrNull { it.referenceName == fdl.name }
-            } else {
-                prevSiblings.withoutWsOrComments.firstOrNull() as? ElmTypeAnnotation
-            }
+    // TODO docs
+    val typeAnnotationIdentifier: PsiElement?
+        get() = getIdentifiers().find {
+            it.nextSiblings.withoutWsOrComments.firstOrNull()?.elementType == COLON
         }
 
-    override val docComment: PsiComment?
+    // TODO docs
+    val functionIdentifier: PsiElement?
+        get() {
+            val ids = getIdentifiers()
+            if (ids.size == 2) return ids[1]
+            if (ids[0].nextSiblings.withoutWsOrComments.firstOrNull()?.elementType == COLON) return null
+            return ids[0]
+        }
+
+    /**
+     * All parameter names declared in this function.
+     *
+     * e.g. `a`, `b`, `c`, `d`, and `e` in `foo a (b, (c, d)) {e} = 42`
+     */
+    val namedParameters: Collection<ElmNameDeclarationPatternTag>
+        get() = descendantsOfType()
+
+    /** The type annotation for this function, or `null` if there isn't one. */
+    val typeAnnotation: ElmTypeExpression?
+        get() = stubDirectChildrenOfType<ElmTypeExpression>().firstOrNull()
+
+    override val docComment: PsiComment? // TODO
         get() = (prevSiblings.withoutWs.filter { it !is ElmTypeAnnotation }.firstOrNull() as? PsiComment)
                 ?.takeIf { it.text.startsWith("{-|") }
 
-    /** The `=` element. In a well-formed program, this will not be null */
-    val eqElement: PsiElement? get() = findChildByType(ElmTypes.EQ)
+    /** The `=` element. In a well-formed program, this will be null only if there is no declaration */
+    val eqElement: PsiElement? get() = findChildByType(EQ)
+
+    override fun getNameIdentifier(): PsiElement {
+        // this will be the annotation name if there's no signature, but that's fine
+        return findChildrenByType<PsiElement>(LOWER_CASE_IDENTIFIER).last()
+    }
+
+    override fun getName(): String =
+            stub?.name ?: nameIdentifier.text
+
+    override fun setName(name: String): PsiElement {
+        val factory = ElmPsiFactory(project)
+        getIdentifiers().forEach {
+            it.replace(factory.createLowerCaseIdentifier(name))
+        }
+        return this
+    }
+
+    override fun getTextOffset() =
+            nameIdentifier.textOffset
+
+    override fun getPresentation() =
+            org.elm.ide.presentation.getPresentation(this)
+
+    private fun getIdentifiers() = findChildrenByType<PsiElement>(LOWER_CASE_IDENTIFIER)
 }

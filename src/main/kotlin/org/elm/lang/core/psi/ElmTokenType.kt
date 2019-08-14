@@ -3,6 +3,7 @@ package org.elm.lang.core.psi
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 import org.elm.lang.core.ElmLanguage
+import org.elm.lang.core.lexer.ElmLayoutLexer
 import org.elm.lang.core.psi.ElmTypes.*
 
 
@@ -53,7 +54,7 @@ val ELM_IDENTIFIERS = tokenSetOf(
  */
 val ELM_TOP_LEVEL_DECLARATIONS = tokenSetOf(
         TYPE_DECLARATION, TYPE_ALIAS_DECLARATION, VALUE_DECLARATION,
-        TYPE_ANNOTATION, PORT_ANNOTATION
+        PORT_ANNOTATION, OPERATOR_DECLARATION, DESTRUCTURING_DECLARATION
 )
 
 /** the virtual tokens which can be synthesized by [ElmLayoutLexer] */

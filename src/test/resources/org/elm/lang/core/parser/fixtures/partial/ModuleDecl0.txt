@@ -6,12 +6,14 @@ Elm File
       PsiElement(UPPER_CASE_IDENTIFIER)('Foo')
     PsiErrorElement:EXPOSING expected, got 'exp'
       <empty list>
-    PsiWhiteSpace(' ')
+  PsiWhiteSpace(' ')
+  ElmValueDeclaration(VALUE_DECLARATION)
     PsiElement(LOWER_CASE_IDENTIFIER)('exp')
+    PsiErrorElement:COLON, EQ, LEFT_BRACE, LEFT_PARENTHESIS, LEFT_SQUARE_BRACKET, LOWER_CASE_IDENTIFIER, NUMBER_LITERAL, OPEN_CHAR, OPEN_QUOTE or UNDERSCORE expected
+      <empty list>
   PsiElement(VIRTUAL_END_DECL)('\n')
   ElmValueDeclaration(VALUE_DECLARATION)
-    ElmFunctionDeclarationLeft(FUNCTION_DECLARATION_LEFT)
-      PsiElement(LOWER_CASE_IDENTIFIER)('bar')
+    PsiElement(LOWER_CASE_IDENTIFIER)('bar')
     PsiWhiteSpace(' ')
     PsiElement(EQ)('=')
     PsiWhiteSpace(' ')

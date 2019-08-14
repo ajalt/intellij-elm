@@ -14,8 +14,12 @@ fun IndexSink.indexFuncDecl(stub: ElmFunctionDeclarationLeftStub) {
     indexNamedStub(stub)
 }
 
+fun IndexSink.indexValueDecl(stub: ElmValueDeclarationStub) {
+    indexNamedStub(stub)
+}
+
 // TODO [drop 0.18] remove this function
-fun IndexSink.indexOperatorDecl(stub: ElmOperatorDeclarationLeftStub) {
+fun IndexSink.indexOperatorDecl(stub: ElmOperatorDeclarationStub) {
     indexNamedStub(stub)
 }
 

@@ -1,5 +1,5 @@
 Elm File
-  ElmTypeAnnotation(TYPE_ANNOTATION)
+  ElmValueDeclaration(VALUE_DECLARATION)
     PsiElement(LOWER_CASE_IDENTIFIER)('f')
     PsiWhiteSpace(' ')
     PsiElement(COLON)(':')
@@ -19,8 +19,7 @@ Elm File
   PsiElement(NUMBER_LITERAL)('2')
   PsiElement(VIRTUAL_END_DECL)('\n')
   ElmValueDeclaration(VALUE_DECLARATION)
-    ElmFunctionDeclarationLeft(FUNCTION_DECLARATION_LEFT)
-      PsiElement(LOWER_CASE_IDENTIFIER)('f')
+    PsiElement(LOWER_CASE_IDENTIFIER)('f')
     PsiWhiteSpace(' ')
     PsiElement(EQ)('=')
     PsiWhiteSpace(' ')

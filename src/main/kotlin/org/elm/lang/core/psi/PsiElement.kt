@@ -36,7 +36,7 @@ import com.intellij.psi.util.PsiUtilCore
 import com.intellij.util.SmartList
 import org.elm.lang.core.lexer.ElmLayoutLexer
 import org.elm.lang.core.psi.ElmTypes.VIRTUAL_END_DECL
-import org.elm.lang.core.psi.elements.ElmValueDeclaration
+import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
 import org.elm.lang.core.stubs.ElmFileStub
 import kotlin.reflect.KClass
 
@@ -203,8 +203,8 @@ val PsiElement.isTopLevel: Boolean
     get() = parent is ElmFile
 
 /** Return the top level value declaration from this element's ancestors */
-fun PsiElement.outermostDeclaration(strict: Boolean): ElmValueDeclaration? =
+fun PsiElement.outermostDeclaration(strict: Boolean): ElmValueDeclarationOld? =
         ancestors.drop(if (strict) 1 else 0)
                 .takeWhile { it !is ElmFile }
-                .filterIsInstance<ElmValueDeclaration>()
+                .filterIsInstance<ElmValueDeclarationOld>()
                 .firstOrNull { it.isTopLevel }

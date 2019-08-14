@@ -38,6 +38,7 @@ class ElmPsiFactory(private val project: Project) {
                     CASE_OF_BRANCH -> ElmCaseOfBranch(node)
                     CHAR_CONSTANT_EXPR -> ElmCharConstantExpr(node)
                     CONS_PATTERN -> ElmConsPattern(node)
+                    DESTRUCTURING_DECLARATION -> ElmDestructuringDeclaration(node)
                     EXPOSED_OPERATOR -> ElmExposedOperator(node)
                     EXPOSED_TYPE -> ElmExposedType(node)
                     EXPOSED_VALUE -> ElmExposedValue(node)
@@ -49,8 +50,7 @@ class ElmPsiFactory(private val project: Project) {
                     FIELD_ACCESSOR_FUNCTION_EXPR -> ElmFieldAccessorFunctionExpr(node)
                     FIELD_TYPE -> ElmFieldType(node)
                     FUNCTION_CALL_EXPR -> ElmFunctionCallExpr(node)
-                    FUNCTION_DECLARATION_LEFT -> ElmFunctionDeclarationLeft(node)
-                    OPERATOR_DECLARATION_LEFT -> ElmOperatorDeclarationLeft(node) // TODO [drop 0.18] remove this line
+                    OPERATOR_DECLARATION -> TODO()
                     OPERATOR_CONFIG -> ElmOperatorConfig(node) // TODO [drop 0.18] remove this line
                     GLSL_CODE_EXPR -> ElmGlslCodeExpr(node)
                     IF_ELSE_EXPR -> ElmIfElseExpr(node)
@@ -66,6 +66,7 @@ class ElmPsiFactory(private val project: Project) {
                     NEGATE_EXPR -> ElmNegateExpr(node)
                     NUMBER_CONSTANT_EXPR -> ElmNumberConstantExpr(node)
                     OPERATOR -> ElmOperator(node)
+                    OPERATOR_DECLARATION -> ElmOperatorDeclaration(node)
                     OPERATOR_AS_FUNCTION_EXPR -> ElmOperatorAsFunctionExpr(node)
                     TYPE_REF -> ElmTypeRef(node)
                     PARENTHESIZED_EXPR -> ElmParenthesizedExpr(node)
@@ -81,7 +82,6 @@ class ElmPsiFactory(private val project: Project) {
                     TUPLE_PATTERN -> ElmTuplePattern(node)
                     TUPLE_TYPE -> ElmTupleType(node)
                     TYPE_ALIAS_DECLARATION -> ElmTypeAliasDeclaration(node)
-                    TYPE_ANNOTATION -> ElmTypeAnnotation(node)
                     TYPE_DECLARATION -> ElmTypeDeclaration(node)
                     TYPE_EXPRESSION -> ElmTypeExpression(node)
                     TYPE_VARIABLE -> ElmTypeVariable(node)
@@ -137,7 +137,7 @@ class ElmPsiFactory(private val project: Project) {
 
     fun createCaseOfBranches(indent: String, patterns: List<String>): List<ElmCaseOfBranch> =
             patterns.joinToString("\n\n$indent", prefix = "foo = case 1 of\n\n$indent") { "$it ->\n$indent    " }
-                    .let { createFromText<ElmValueDeclaration>(it) }
+                    .let { createFromText<ElmValueDeclarationOld>(it) }
                     ?.descendantOfType<ElmCaseOfExpr>()?.branches
                     ?: error("Failed to create case of branches from $patterns")
 
@@ -153,7 +153,7 @@ class ElmPsiFactory(private val project: Project) {
         |${indent}in
         |${indent}$bodyText
         """.trimMargin()
-        return createFromText<ElmValueDeclaration>(code)
+        return createFromText<ElmValueDeclarationOld>(code)
                 ?.descendantOfType()
                 ?: error("Failed to create let/in wrapper")
     }

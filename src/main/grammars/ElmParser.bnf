@@ -13,7 +13,6 @@
     elementTypeFactory("TypeDeclaration")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("TypeAliasDeclaration")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("UnionVariant")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
-    elementTypeFactory("FunctionDeclarationLeft")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("InfixDeclaration")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("InfixFuncRef")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("ExposingList")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
@@ -22,7 +21,7 @@
     elementTypeFactory("ExposedType")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("ExposedUnionConstructor")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("ExposedUnionConstructors")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
-    elementTypeFactory("ValueDeclaration")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
+    elementTypeFactory("DestructuringDeclaration")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("PortAnnotation")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
 
     // stubs necessary to make type inference work using stubs
@@ -35,13 +34,13 @@
     elementTypeFactory("TypeVariable")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("LowerTypeName")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("RecordBaseIdentifier")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
-    elementTypeFactory("TypeAnnotation")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("ImportClause")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("AsClause")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
     elementTypeFactory("UpperCaseQID")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
+    elementTypeFactory("ValueDeclaration")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
 
     // TODO [drop 0.18] remove this stub
-    elementTypeFactory("OperatorDeclarationLeft")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
+    elementTypeFactory("OperatorDeclaration")="org.elm.lang.core.stubs.StubImplementationsKt.factory"
 
     tokens = [
         // tokens used by manual/external parse rules
@@ -177,25 +176,46 @@ private Declaration ::=
     ValueDeclaration
     | TypeAliasDeclaration
     | TypeDeclaration
-    | TypeAnnotation
     | PortAnnotation
+    | DestructuringDeclaration  // TODO [drop 0.18] remove top-level DestructuringDeclaration
+    | OperatorDeclaration
     | OperatorConfig
     | InfixDeclaration
 
-ValueDeclaration ::= InternalValueDeclarationLeft EQ Expression
-    { pin = 'EQ' }
+ // TODO [drop 0.18] remove the OperatorAsFunction_inner clause
+ValueDeclaration ::=
+    (LOWER_CASE_IDENTIFIER|OperatorAsFunction_inner) (AnnotationThenDecl | FunctionDeclarationAfterId)
+    { pin = 1 }
 
-private InternalValueDeclarationLeft ::=
-    FunctionDeclarationLeft
-    | OperatorDeclarationLeft
-    | Pattern
+private AnnotationThenDecl ::=
+    COLON TypeExpression DeclAfterAnnotation?
+    { pin = 1 }
 
-FunctionDeclarationLeft ::=
-    LOWER_CASE_IDENTIFIER FunctionDeclarationPattern*
+// No pinning here; the identifier might belong another type annotation
+// TODO [drop 0.18] remove the OperatorAsFunction_inner clause
+private DeclAfterAnnotation ::=
+    VIRTUAL_END_DECL (LOWER_CASE_IDENTIFIER|OperatorAsFunction_inner) FunctionDeclarationAfterId
 
- // TODO [drop 0.18] remove OperatorDeclarationLeft
-OperatorDeclarationLeft ::=
-    OperatorAsFunction_inner FunctionDeclarationPattern*
+private FunctionParameters ::=
+    FunctionDeclarationPattern*
+    { pin(".*") = 1 }
+
+private FunctionDeclarationAfterId ::=
+    FunctionParameters ValueAssignment
+    { pin = 2 }
+
+private ValueAssignment ::=
+    EQ Expression
+    { pin = 1 }
+
+ // TODO [drop 0.18] remove OperatorDeclaration
+OperatorDeclaration ::=
+    OperatorAsFunction_inner FunctionDeclarationPattern* ValueAssignment
+    { pin = 3 }
+
+DestructuringDeclaration ::=
+    Pattern ValueAssignment
+    { pin = 1 }
 
 private FunctionDeclarationPattern ::=
         AnythingPattern
@@ -262,11 +282,6 @@ TupleType ::=
     UnitExpr
     | LEFT_PARENTHESIS TypeExpression (COMMA TypeExpression)+ RIGHT_PARENTHESIS
 
-
- // TODO [drop 0.18] remove the OperatorAsFunction_inner clause
-TypeAnnotation ::=
-    (LOWER_CASE_IDENTIFIER|OperatorAsFunction_inner) COLON TypeExpression
-    { pin = 'COLON' }
 
 PortAnnotation ::= PORT LOWER_CASE_IDENTIFIER COLON TypeExpression
     { pin = 'COLON' }
@@ -461,7 +476,8 @@ private LetInTail ::=
 
 private InnerDeclaration ::=
     ValueDeclaration
-    | TypeAnnotation
+    | DestructuringDeclaration
+    | OperatorDeclaration
     { recoverWhile=inner_decl_recover }
 
 private inner_decl_recover ::= !(VIRTUAL_END_DECL|VIRTUAL_END_SECTION)

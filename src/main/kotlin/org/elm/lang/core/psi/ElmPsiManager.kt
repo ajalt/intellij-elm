@@ -13,7 +13,6 @@ import com.intellij.openapi.util.SimpleModificationTracker
 import com.intellij.psi.*
 import com.intellij.psi.impl.PsiTreeChangeEventImpl
 import org.elm.lang.core.ElmFileType
-import org.elm.lang.core.psi.elements.ElmValueDeclaration
 
 class ElmPsiManager(val project: Project) : ProjectComponent {
     val modificationTracker = SimpleModificationTracker()

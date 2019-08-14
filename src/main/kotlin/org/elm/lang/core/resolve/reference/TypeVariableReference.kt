@@ -49,7 +49,7 @@ class TypeVariableReference(
 
     private fun typeAnnotationVariants(annotation: ElmTypeAnnotation): List<ElmNamedElement> {
         val parents = annotation.ancestorsStrict.takeWhile { it !is ElmFile }
-                .filterIsInstance<ElmValueDeclaration>()
+                .filterIsInstance<ElmValueDeclarationOld>()
                 .mapNotNull { it.typeAnnotation }
         return (sequenceOf(annotation) + parents)
                 .mapNotNull { it.typeExpression?.allTypeVariablesRecursively }

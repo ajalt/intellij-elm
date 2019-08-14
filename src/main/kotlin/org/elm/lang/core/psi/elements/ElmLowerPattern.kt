@@ -48,7 +48,7 @@ class ElmLowerPattern(node: ASTNode) : ElmNamedElementImpl(node, IdentifierCase.
          * TODO make more restrictive, being careful to handle all of the cases
          */
 
-        val decl = PsiTreeUtil.getParentOfType(this, ElmValueDeclaration::class.java)
+        val decl = PsiTreeUtil.getParentOfType(this, ElmValueDeclarationOld::class.java)
         val patternDecl = decl?.pattern
         if (patternDecl != null && decl.isTopLevel && this in patternDecl.descendants) {
             // This pattern is contained within a top-level destructuring assignment.

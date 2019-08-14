@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.elm.lang.core.psi.elements.ElmFunctionDeclarationLeft
-import org.elm.lang.core.psi.elements.ElmValueDeclaration
+import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
 import org.elm.lang.core.psi.parentOfType
 import org.elm.lang.core.psi.startOffset
 import org.elm.lang.core.types.Ty
@@ -15,7 +15,7 @@ import org.elm.utils.getIndent
 
 class MakeAnnotationIntention : ElmAtCaretIntentionActionBase<MakeAnnotationIntention.Context>() {
 
-    data class Context(val fdl: ElmFunctionDeclarationLeft, val valueDeclaration: ElmValueDeclaration, val ty: Ty)
+    data class Context(val fdl: ElmFunctionDeclarationLeft, val valueDeclaration: ElmValueDeclarationOld, val ty: Ty)
 
     override fun getText() = "Add type annotation"
     override fun getFamilyName() = text
@@ -24,7 +24,7 @@ class MakeAnnotationIntention : ElmAtCaretIntentionActionBase<MakeAnnotationInte
         val fdl = element.parentOfType<ElmFunctionDeclarationLeft>()
                 ?: return null
 
-        val declaration = fdl.parentOfType<ElmValueDeclaration>()
+        val declaration = fdl.parentOfType<ElmValueDeclarationOld>()
                 ?: return null
 
         if (declaration.typeAnnotation != null) {

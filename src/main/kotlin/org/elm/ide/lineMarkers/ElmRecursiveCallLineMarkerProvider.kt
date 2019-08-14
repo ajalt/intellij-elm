@@ -2,7 +2,6 @@ package org.elm.ide.lineMarkers
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProvider
-import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
@@ -10,9 +9,7 @@ import com.intellij.util.FunctionUtil
 import org.elm.ide.icons.ElmIcons
 import org.elm.lang.core.psi.*
 import org.elm.lang.core.psi.ElmTypes.LOWER_CASE_IDENTIFIER
-import org.elm.lang.core.psi.ElmTypes.UPPER_CASE_IDENTIFIER
 import org.elm.lang.core.psi.elements.*
-import org.elm.lang.core.resolve.ElmReferenceElement
 
 /**
  * Put an icon in the gutter for top-level declarations (types, functions, values)
@@ -39,7 +36,7 @@ class ElmRecursiveCallLineMarkerProvider : LineMarkerProvider {
             if (functionCall.target != valueExpr) continue
 
             val ref = valueExpr.reference.resolve()
-            val nearestFunc = functionCall.ancestorsStrict.filterIsInstance<ElmValueDeclaration>()
+            val nearestFunc = functionCall.ancestorsStrict.filterIsInstance<ElmValueDeclarationOld>()
                     .firstOrNull()?.functionDeclarationLeft
             if (nearestFunc != ref) continue // not recursive
 

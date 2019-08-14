@@ -65,7 +65,7 @@ class ElmFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, ElmLan
             stubDirectChildrenOfType<ElmImportClause>()
 
     fun getValueDeclarations() =
-            stubDirectChildrenOfType<ElmValueDeclaration>()
+            stubDirectChildrenOfType<ElmValueDeclarationOld>()
 
     fun getTypeDeclarations() =
             stubDirectChildrenOfType<ElmTypeDeclaration>()

@@ -55,7 +55,7 @@ class ElmDocumentationProvider : AbstractDocumentationProvider() {
 }
 
 private fun documentationFor(decl: ElmFunctionDeclarationLeft): String? = buildString {
-    val parent = decl.parent as? ElmValueDeclaration ?: return null
+    val parent = decl.parent as? ElmValueDeclarationOld ?: return null
     val ty = parent.findTy()
     val id = decl.lowerCaseIdentifier.text
     definition {
@@ -203,7 +203,7 @@ private fun documentationFor(clause: ElmAsClause): String? = buildString {
 }
 
 private fun documentationFor(element: ElmInfixDeclaration): String? {
-    val decl = element.funcRef?.reference?.resolve()?.parentOfType<ElmValueDeclaration>() ?: return null
+    val decl = element.funcRef?.reference?.resolve()?.parentOfType<ElmValueDeclarationOld>() ?: return null
     val func = decl.functionDeclarationLeft ?: return null
     return documentationFor(func)
 }

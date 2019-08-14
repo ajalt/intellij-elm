@@ -12,7 +12,7 @@ import org.elm.lang.core.psi.elements.*
 import org.elm.lang.core.resolve.ElmReferenceElement
 import org.elm.lang.core.resolve.scope.ModuleScope
 
-private val TYPE_INFERENCE_KEY: Key<ParameterizedCachedValue<InferenceResult, Set<ElmValueDeclaration>>> =
+private val TYPE_INFERENCE_KEY: Key<ParameterizedCachedValue<InferenceResult, Set<ElmValueDeclarationOld>>> =
         Key.create("TYPE_INFERENCE_KEY")
 
 /** Find the inference result that contains the given element */
@@ -25,10 +25,10 @@ fun PsiElement.findInference(): InferenceResult? {
 fun ElmPsiElement.findTy(): Ty? {
     return when (this) {
         is ElmFunctionDeclarationLeft -> {
-            val decl = parentOfType<ElmValueDeclaration>() ?: return null
+            val decl = parentOfType<ElmValueDeclarationOld>() ?: return null
             return findInference()?.let { it.expressionTypes[decl] ?: it.ty }
         }
-        is ElmValueDeclaration -> {
+        is ElmValueDeclarationOld -> {
             findInference()?.let { it.expressionTypes[this] ?: it.ty }
         }
         else -> {
@@ -37,7 +37,7 @@ fun ElmPsiElement.findTy(): Ty? {
     }
 }
 
-private fun ElmValueDeclaration.inference(activeScopes: Set<ElmValueDeclaration>): InferenceResult {
+private fun ElmValueDeclarationOld.inference(activeScopes: Set<ElmValueDeclarationOld>): InferenceResult {
     return CachedValuesManager.getManager(project).getParameterizedCachedValue(this, TYPE_INFERENCE_KEY, { useActiveScopes ->
         // Elm lets you shadow imported names, including auto-imported names, so only count names
         // declared in this file as shadowable.
@@ -63,7 +63,7 @@ private fun ElmValueDeclaration.inference(activeScopes: Set<ElmValueDeclaration>
  */
 private class InferenceScope(
         private val shadowableNames: MutableSet<String>,
-        private val activeScopes: MutableSet<ElmValueDeclaration>,
+        private val activeScopes: MutableSet<ElmValueDeclarationOld>,
         private val recursionAllowed: Boolean,
         private val parent: InferenceScope?
 ) {
@@ -73,7 +73,7 @@ private class InferenceScope(
      * since you can't read from the cache without a reference to the element anyway, and this way
      * we can cache declarations for sibling elements and other relatives.
      */
-    private val resolvedDeclarations: MutableMap<ElmValueDeclaration, Ty> = parent?.resolvedDeclarations
+    private val resolvedDeclarations: MutableMap<ElmValueDeclarationOld, Ty> = parent?.resolvedDeclarations
             ?: mutableMapOf()
     /** names declared in parameters and patterns */
     private val bindings: MutableMap<ElmNamedElement, Ty> = mutableMapOf()
@@ -85,7 +85,7 @@ private class InferenceScope(
      * This is used when inferring references to nested declarations that follow the current declaration lexically
      * so that we can find which ancestor to start inference from.
      */
-    private val childDeclarations: MutableSet<ElmValueDeclaration> = mutableSetOf()
+    private val childDeclarations: MutableSet<ElmValueDeclarationOld> = mutableSetOf()
     /** The inferred types of elements that should be exposed through documentation. */
     private val expressionTypes: MutableMap<ElmPsiElement, Ty> = mutableMapOf()
 
@@ -111,7 +111,7 @@ private class InferenceScope(
      * `begin` function should be called on a scope instance.
      */
 
-    fun beginDeclarationInference(declaration: ElmValueDeclaration, replaceExpressionTypes: Boolean): InferenceResult {
+    fun beginDeclarationInference(declaration: ElmValueDeclarationOld, replaceExpressionTypes: Boolean): InferenceResult {
         val assignee = declaration.assignee
 
         // If the assignee has any syntax errors, we don't run inference on it. Trying to resolve
@@ -184,7 +184,7 @@ private class InferenceScope(
     }
 
     private inline fun inferChild(
-            activeScopes: MutableSet<ElmValueDeclaration> = this.activeScopes.toMutableSet(),
+            activeScopes: MutableSet<ElmValueDeclarationOld> = this.activeScopes.toMutableSet(),
             recursionAllowed: Boolean = this.recursionAllowed,
             block: InferenceScope.() -> InferenceResult
     ): InferenceResult {
@@ -195,8 +195,8 @@ private class InferenceScope(
     }
 
     private fun inferChildDeclaration(
-            decl: ElmValueDeclaration,
-            activeScopes: Set<ElmValueDeclaration> = this.activeScopes
+            decl: ElmValueDeclarationOld,
+            activeScopes: Set<ElmValueDeclarationOld> = this.activeScopes
     ): InferenceResult {
         val result = inferChild(activeScopes = activeScopes.toMutableSet()) { beginDeclarationInference(decl, false) }
         resolvedDeclarations[decl] = result.ty
@@ -220,7 +220,7 @@ private class InferenceScope(
         return result
     }
 
-    private fun checkRecursion(declaration: ElmValueDeclaration): Boolean {
+    private fun checkRecursion(declaration: ElmValueDeclarationOld): Boolean {
         val isRecursive = declaration in activeScopes
         // Recursion is a compile-time error if the function doesn't have any parameters
         val fdl = declaration.functionDeclarationLeft
@@ -686,7 +686,7 @@ private class InferenceScope(
         return inferReferencedValueDeclaration(ref?.parentOfType())
     }
 
-    private fun inferReferencedValueDeclaration(decl: ElmValueDeclaration?): Ty {
+    private fun inferReferencedValueDeclaration(decl: ElmValueDeclarationOld?): Ty {
         if (decl == null || checkRecursion(decl)) return TyUnknown()
         val existing = resolvedDeclarations[decl]
         if (existing != null) return TypeReplacement.freshenVars(existing)
@@ -736,7 +736,7 @@ private class InferenceScope(
      * @return a pair of the entire declared type (or [TyUnknown] if no annotation exists), and the
      *   number of parameters in the declaration
      */
-    private fun bindParameters(valueDeclaration: ElmValueDeclaration): ParameterBindingResult {
+    private fun bindParameters(valueDeclaration: ElmValueDeclarationOld): ParameterBindingResult {
         return when {
             valueDeclaration.functionDeclarationLeft != null -> {
                 bindFunctionDeclarationParameters(valueDeclaration, valueDeclaration.functionDeclarationLeft!!)
@@ -756,7 +756,7 @@ private class InferenceScope(
     }
 
     private fun bindFunctionDeclarationParameters(
-            valueDeclaration: ElmValueDeclaration,
+            valueDeclaration: ElmValueDeclarationOld,
             decl: ElmFunctionDeclarationLeft
     ): ParameterBindingResult {
         val typeRefTy = valueDeclaration.typeAnnotation
@@ -782,7 +782,7 @@ private class InferenceScope(
         return ParameterBindingResult.Annotated(typeRefTy, patterns.size)
     }
 
-    private fun bindPatternDeclarationParameters(valueDeclaration: ElmValueDeclaration, pattern: ElmPattern) {
+    private fun bindPatternDeclarationParameters(valueDeclaration: ElmValueDeclarationOld, pattern: ElmPattern) {
         // For case branches and pattern declarations like `(x,y) = (1,2)`, we need to finish
         // inferring the expression before we can bind the parameters. In these cases, it's an error
         // to use a name from the pattern in its expression (e.g. `{x} = {x=x}`). We need to know
@@ -1296,9 +1296,9 @@ private fun uniqueVars(count: Int): List<TyVar> {
     return varNames().take(count).map { TyVar(it) }.toList()
 }
 
-/** Return the nearest [ElmValueDeclaration] if it declares a pattern, or `null` otherwise */
-private fun parentPatternDecl(element: ElmPsiElement): ElmValueDeclaration? {
-    val decl = element.parentOfType<ElmValueDeclaration>()
+/** Return the nearest [ElmValueDeclarationOld] if it declares a pattern, or `null` otherwise */
+private fun parentPatternDecl(element: ElmPsiElement): ElmValueDeclarationOld? {
+    val decl = element.parentOfType<ElmValueDeclarationOld>()
     return if (decl?.pattern == null) null else decl
 }
 

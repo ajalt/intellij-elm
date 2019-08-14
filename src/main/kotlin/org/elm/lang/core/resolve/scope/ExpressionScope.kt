@@ -7,7 +7,7 @@ import org.elm.lang.core.psi.ancestors
 import org.elm.lang.core.psi.elements.ElmAnonymousFunctionExpr
 import org.elm.lang.core.psi.elements.ElmCaseOfBranch
 import org.elm.lang.core.psi.elements.ElmLetInExpr
-import org.elm.lang.core.psi.elements.ElmValueDeclaration
+import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
 
 
 class ExpressionScope(val element: PsiElement) {
@@ -26,7 +26,7 @@ class ExpressionScope(val element: PsiElement) {
                 results.add(it)
             }
 
-            if (it is ElmValueDeclaration) {
+            if (it is ElmValueDeclarationOld) {
                 results.addAll(it.declaredNames())
             }
 

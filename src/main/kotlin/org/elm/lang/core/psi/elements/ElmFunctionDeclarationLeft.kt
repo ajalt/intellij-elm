@@ -62,7 +62,7 @@ class ElmFunctionDeclarationLeft : ElmStubbedNamedElementImpl<ElmFunctionDeclara
     val isTopLevel: Boolean
         get() {
             val p = parent
-            return p is ElmValueDeclaration && p.isTopLevel
+            return p is ElmValueDeclarationOld && p.isTopLevel
         }
 
     override fun getUseScope(): SearchScope {
