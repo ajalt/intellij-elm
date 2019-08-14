@@ -25,8 +25,8 @@ class ElmLetInExpr(node: ASTNode) : ElmPsiElementImpl(node), ElmAtomTag {
      *
      * In a well-formed program, there will be at least one element.
      */
-    val valueDeclarationList: List<ElmValueDeclarationOld>
-        get() = PsiTreeUtil.getChildrenOfTypeAsList(this, ElmValueDeclarationOld::class.java)
+    val valueDeclarationList: List<ElmValueDeclaration>
+        get() = directChildrenOfType()
 
     /**
      * The body expression.

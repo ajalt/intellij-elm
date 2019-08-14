@@ -3,6 +3,7 @@ package org.elm.lang.core.resolve.reference
 import com.intellij.psi.PsiElement
 import org.elm.lang.core.psi.ElmFile
 import org.elm.lang.core.psi.ElmNamedElement
+import org.elm.lang.core.psi.ancestors
 import org.elm.lang.core.psi.ancestorsStrict
 import org.elm.lang.core.psi.elements.*
 import org.elm.lang.core.resolve.ElmReferenceElement
@@ -33,7 +34,7 @@ class TypeVariableReference(
 
     override fun isSoft(): Boolean {
         val decl = declaration()
-        return decl == null || element is ElmRecordBaseIdentifier && decl is ElmTypeAnnotation
+        return decl == null || element is ElmRecordBaseIdentifier && decl is ElmTypeExpression
     }
 
     override fun getVariants(): Array<ElmNamedElement> {
@@ -42,17 +43,17 @@ class TypeVariableReference(
         return when (decl) {
             is ElmTypeAliasDeclaration -> decl.lowerTypeNameList
             is ElmTypeDeclaration -> decl.lowerTypeNameList
-            is ElmTypeAnnotation -> typeAnnotationVariants(decl)
+            is ElmValueDeclaration -> typeAnnotationVariants(decl)
             else -> emptyList()
         }.toTypedArray()
     }
 
-    private fun typeAnnotationVariants(annotation: ElmTypeAnnotation): List<ElmNamedElement> {
-        val parents = annotation.ancestorsStrict.takeWhile { it !is ElmFile }
-                .filterIsInstance<ElmValueDeclarationOld>()
+    private fun typeAnnotationVariants(annotation: ElmValueDeclaration): List<ElmNamedElement> {
+        val parents = annotation.ancestors.takeWhile { it !is ElmFile }
+                .filterIsInstance<ElmValueDeclaration>()
                 .mapNotNull { it.typeAnnotation }
-        return (sequenceOf(annotation) + parents)
-                .mapNotNull { it.typeExpression?.allTypeVariablesRecursively }
+        return parents
+                .map { it.allTypeVariablesRecursively }
                 .toList().asReversed()
                 .flatten()
     }
@@ -62,7 +63,9 @@ class TypeVariableReference(
 
     private fun declaration(): PsiElement? {
         return element.ancestorsStrict.takeWhile { it !is ElmFile }.firstOrNull {
-            it is ElmTypeAliasDeclaration || it is ElmTypeDeclaration || it is ElmTypeAnnotation
+            it is ElmTypeExpression && it.parent is ElmValueDeclaration ||
+                    it is ElmTypeDeclaration ||
+                    it is ElmTypeAliasDeclaration
         }
     }
 }

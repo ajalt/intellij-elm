@@ -59,39 +59,39 @@ fun ElmUnionVariant.typeExpressionInference(): ParameterizedInferenceResult<Ty> 
     return cachedValue.copy(value = TypeReplacement.freshenVars(cachedValue.value, freeze = true))
 }
 
-/**
- * Get the type of the expression in this annotation, or null if the program is incomplete and no expression exists.
- *
- * @param rigid If true, all all [TyVar]s in the result ty will be rigid.
- */
-fun ElmTypeAnnotation.typeExpressionInference(rigid: Boolean = true): InferenceResult? {
-    val typeRef = typeExpression ?: return null
-
-    // PSI changes inside a value declaration only invalidate the modification tracker for the
-    // outer-most declaration, not the entire project. If this is a nested annotation, we need to
-    // find that tracker.
-    val parentModificationTracker = outermostDeclaration(strict = true)?.modificationTracker
-
-    val cachedValue = CachedValuesManager.getCachedValue(typeRef, TY_ANNOTATION_CACHE_KEY) {
-        val inferenceResult = TypeExpression(this, rigidVars = true).beginTypeRefInference(typeRef)
-        val frozenResult =  inferenceResult.copy(ty = TypeReplacement.freeze(inferenceResult.ty))
-
-        val trackers = when (parentModificationTracker) {
-            null -> arrayOf(project.modificationTracker)
-            else -> arrayOf(project.modificationTracker, parentModificationTracker)
-        }
-
-        CachedValueProvider.Result.create(frozenResult, *trackers)
-    }
-    // As an optimization, we don't freshen the tys here. The `flexify` call takes care of
-    // freshening the inferred ty for function calls. Parameter binding needs expression types to
-    // _not_ be freshened so that we can keep track of variables that reference outer scopes.
-    // Non-inference usages don't care about freshness either way.
-    if (!rigid) {
-        return cachedValue.copy(ty = TypeReplacement.flexify(cachedValue.ty))
-    }
-    return cachedValue
-}
+///**
+// * Get the type of the expression in this annotation, or null if the program is incomplete and no expression exists.
+// *
+// * @param rigid If true, all all [TyVar]s in the result ty will be rigid.
+// */
+//fun ElmTypeAnnotation.typeExpressionInference(rigid: Boolean = true): InferenceResult? {
+//    val typeRef = typeExpression ?: return null
+//
+//    // PSI changes inside a value declaration only invalidate the modification tracker for the
+//    // outer-most declaration, not the entire project. If this is a nested annotation, we need to
+//    // find that tracker.
+//    val parentModificationTracker = outermostDeclaration(strict = true)?.modificationTracker
+//
+//    val cachedValue = CachedValuesManager.getCachedValue(typeRef, TY_ANNOTATION_CACHE_KEY) {
+//        val inferenceResult = TypeExpression(this, rigidVars = true).beginTypeRefInference(typeRef)
+//        val frozenResult =  inferenceResult.copy(ty = TypeReplacement.freeze(inferenceResult.ty))
+//
+//        val trackers = when (parentModificationTracker) {
+//            null -> arrayOf(project.modificationTracker)
+//            else -> arrayOf(project.modificationTracker, parentModificationTracker)
+//        }
+//
+//        CachedValueProvider.Result.create(frozenResult, *trackers)
+//    }
+//    // As an optimization, we don't freshen the tys here. The `flexify` call takes care of
+//    // freshening the inferred ty for function calls. Parameter binding needs expression types to
+//    // _not_ be freshened so that we can keep track of variables that reference outer scopes.
+//    // Non-inference usages don't care about freshness either way.
+//    if (!rigid) {
+//        return cachedValue.copy(ty = TypeReplacement.flexify(cachedValue.ty))
+//    }
+//    return cachedValue
+//}
 
 /** Get the names and parameter tys for all variants of this union */
 fun ElmTypeDeclaration.variantInference(): ParameterizedInferenceResult<VariantParameters> =
@@ -213,44 +213,45 @@ class TypeExpression(
     }
 
     private fun typeVariableType(typeVar: ElmTypeVariable): Ty {
-        // type variables only ever reference other vars in the same annotation or a parent
-        // annotation; there's no risk of circular references.
-        val ref = typeVar.reference.resolve()
-
-        // If the var doesn't reference anything, then we can infer it's ty directly
-        if (ref == null || ref == typeVar) {
-            val ty = getTyVar(typeVar)
-            expressionTypes[typeVar] = ty
-            return ty
-        }
-
-        val cached = varsByElement[ref]
-        if (cached != null) return cached
-
-        val annotation = ref.ancestorsStrict.takeWhile { it !is ElmFile }
-                .filterIsInstance<ElmTypeAnnotation>()
-                .firstOrNull()
-        val expr = annotation?.typeExpression
-
-        // If the reference is to a variable not declared in an annotation, or to another variable
-        // in the same annotation we're already working on, we use the ty of the reference.
-        if (annotation == null || expr == null || expr == root) {
-            val ty = getTyVar(ref)
-            varsByElement[typeVar] = ty
-            expressionTypes[typeVar] = ty
-            return ty
-        }
-
-        // If the reference is to a variable declared in a parent annotation, we need to use the ty
-        // from that annotation's inference
-        val ty = annotation.typeExpressionInference(rigid = true)
-                ?.expressionTypes?.get(ref) ?: TyUnknown()
-        if (ty is TyVar) {
-            varsByElement[ref] = ty
-        }
-
-        expressionTypes[typeVar] = ty
-        return ty
+        return TyUnknown()
+//        // type variables only ever reference other vars in the same annotation or a parent
+//        // annotation; there's no risk of circular references.
+//        val ref = typeVar.reference.resolve()
+//
+//        // If the var doesn't reference anything, then we can infer it's ty directly
+//        if (ref == null || ref == typeVar) {
+//            val ty = getTyVar(typeVar)
+//            expressionTypes[typeVar] = ty
+//            return ty
+//        }
+//
+//        val cached = varsByElement[ref]
+//        if (cached != null) return cached
+//
+//        val annotation = ref.ancestorsStrict.takeWhile { it !is ElmFile }
+//                .filterIsInstance<ElmTypeAnnotation>()
+//                .firstOrNull()
+//        val expr = annotation?.typeExpression
+//
+//        // If the reference is to a variable not declared in an annotation, or to another variable
+//        // in the same annotation we're already working on, we use the ty of the reference.
+//        if (annotation == null || expr == null || expr == root) {
+//            val ty = getTyVar(ref)
+//            varsByElement[typeVar] = ty
+//            expressionTypes[typeVar] = ty
+//            return ty
+//        }
+//
+//        // If the reference is to a variable declared in a parent annotation, we need to use the ty
+//        // from that annotation's inference
+//        val ty = annotation.typeExpressionInference(rigid = true)
+//                ?.expressionTypes?.get(ref) ?: TyUnknown()
+//        if (ty is TyVar) {
+//            varsByElement[ref] = ty
+//        }
+//
+//        expressionTypes[typeVar] = ty
+//        return ty
     }
 
     private fun recordTypeDeclType(record: ElmRecordType): TyRecord {

@@ -25,7 +25,8 @@ import org.elm.lang.core.stubs.ElmValueDeclarationStub
  *    x a = a
  *    ```
  */
-class ElmValueDeclaration : ElmStubbedElement<ElmValueDeclarationStub>, ElmNameIdentifierOwner, ElmExposableTag, ElmDocTarget {
+class ElmValueDeclaration : ElmStubbedElement<ElmValueDeclarationStub>,
+        ElmNameIdentifierOwner, ElmExposableTag, ElmDocTarget, ElmDeclarationTag {
 
     constructor(node: ASTNode) :
             super(node)
@@ -85,12 +86,18 @@ class ElmValueDeclaration : ElmStubbedElement<ElmValueDeclarationStub>, ElmNameI
     val namedParameters: Collection<ElmNameDeclarationPatternTag>
         get() = descendantsOfType()
 
+    /**
+     * Zero or more parameters to the function
+     */
+    val patterns: List<ElmFunctionParamTag>
+        get() = directChildrenOfType()
+
     /** The type annotation for this function, or `null` if there isn't one. */
     val typeAnnotation: ElmTypeExpression?
         get() = stubDirectChildrenOfType<ElmTypeExpression>().firstOrNull()
 
-    override val docComment: PsiComment? // TODO
-        get() = (prevSiblings.withoutWs.filter { it !is ElmTypeAnnotation }.firstOrNull() as? PsiComment)
+    override val docComment: PsiComment?
+        get() = (prevSiblings.withoutWs.firstOrNull() as? PsiComment)
                 ?.takeIf { it.text.startsWith("{-|") }
 
     /** The `=` element. In a well-formed program, this will be null only if there is no declaration */

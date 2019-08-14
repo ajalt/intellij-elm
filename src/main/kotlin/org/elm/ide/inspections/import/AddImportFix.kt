@@ -62,10 +62,6 @@ class AddImportFix(element: ElmPsiElement) : LocalQuickFixOnPsiElement(element) 
         if (element.parentOfType<ElmImportClause>() != null) return null
         val refElement = element.parentOfType<ElmReferenceElement>(strict = false) ?: return null
         val ref = refElement.reference
-
-        // we can't import the function we're annotating
-        if (refElement is ElmTypeAnnotation) return null
-
         val name = refElement.referenceName
         val candidates = ElmLookup.findByName<ElmExposableTag>(name, refElement.elmFile)
                 .mapNotNull { fromExposableElement(it, ref) }
@@ -166,7 +162,7 @@ private fun fromExposableElement(element: ElmExposableTag, ref: ElmReference): I
             "(${element.name})"
 
         // TODO [drop 0.18] remove this clause
-        is ElmOperatorDeclarationLeft ->
+        is ElmOperatorDeclaration ->
             "(${element.name})"
 
         else ->

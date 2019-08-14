@@ -6,7 +6,7 @@ import org.elm.lang.ElmTestBase
 import org.elm.lang.core.psi.ElmPsiElement
 import org.elm.lang.core.psi.descendantsOfType
 import org.elm.lang.core.psi.elements.ElmTypeAliasDeclaration
-import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 import org.elm.lang.core.psi.elements.ElmValueExpr
 import org.elm.lang.core.types.findInference
 import org.elm.lang.core.types.findTy
@@ -263,7 +263,7 @@ foo { name } = name
 
 
     private fun checkNoInferenceErrors() {
-        val diagnostics = myFixture.file.descendantsOfType<ElmValueDeclarationOld>()
+        val diagnostics = myFixture.file.descendantsOfType<ElmValueDeclaration>()
                 .flatMap { it.findInference()?.diagnostics ?: emptyList() }
         if (diagnostics.isNotEmpty()) {
             error(

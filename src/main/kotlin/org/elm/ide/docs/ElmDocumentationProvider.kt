@@ -24,7 +24,7 @@ import java.net.URI
 
 class ElmDocumentationProvider : AbstractDocumentationProvider() {
     override fun generateDoc(element: PsiElement?, originalElement: PsiElement?) = when (element) {
-        is ElmFunctionDeclarationLeft -> documentationFor(element)
+        is ElmValueDeclaration -> documentationFor(element)
         is ElmTypeDeclaration -> documentationFor(element)
         is ElmUnionVariant -> documentationFor(element)
         is ElmTypeAliasDeclaration -> documentationFor(element)
@@ -54,19 +54,18 @@ class ElmDocumentationProvider : AbstractDocumentationProvider() {
     }
 }
 
-private fun documentationFor(decl: ElmFunctionDeclarationLeft): String? = buildString {
-    val parent = decl.parent as? ElmValueDeclarationOld ?: return null
+private fun documentationFor(decl: ElmValueDeclaration): String? = buildString {
+    val parent = decl.parent as? ElmValueDeclaration ?: return null
     val ty = parent.findTy()
-    val id = decl.lowerCaseIdentifier.text
     definition {
         if (ty != null && ty !is TyUnknown) {
-            b { append(id) }
+            b { append(decl.name) }
             append(" : ")
             append(ty.renderedText(linkify = true, withModule = false))
             append("\n")
         }
 
-        b {append(id) }
+        b {append(decl.name) }
         for (pat in decl.patterns) {
             append(" ")
             // As clauses can't appear at the top level, but can appear inside parentheses
@@ -136,7 +135,7 @@ private fun documentationFor(decl: ElmTypeAliasDeclaration): String? = buildStri
 
 private fun documentationFor(pattern: ElmLowerPattern): String? = documentationForParameter(pattern)
 private fun documentationForParameter(element: ElmNamedElement): String? = buildString {
-    val function = element.parentOfType<ElmFunctionDeclarationLeft>() ?: return null
+    val function = element.parentOfType<ElmValueDeclaration>() ?: return null
     val ty = element.findTy()
 
     definition {
@@ -203,8 +202,7 @@ private fun documentationFor(clause: ElmAsClause): String? = buildString {
 }
 
 private fun documentationFor(element: ElmInfixDeclaration): String? {
-    val decl = element.funcRef?.reference?.resolve()?.parentOfType<ElmValueDeclarationOld>() ?: return null
-    val func = decl.functionDeclarationLeft ?: return null
+    val func = element.funcRef?.reference?.resolve()?.parentOfType<ElmValueDeclaration>() ?: return null
     return documentationFor(func)
 }
 

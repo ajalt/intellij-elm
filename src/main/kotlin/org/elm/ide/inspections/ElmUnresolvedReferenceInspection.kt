@@ -2,17 +2,14 @@ package org.elm.ide.inspections
 
 import com.intellij.codeInspection.LocalQuickFixOnPsiElement
 import com.intellij.codeInspection.ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
-import com.intellij.codeInspection.ProblemHighlightType.WEAK_WARNING
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReference
 import org.elm.ide.inspections.import.AddImportFix
 import org.elm.ide.inspections.import.AddQualifierFix
-import org.elm.ide.inspections.import.MakeDeclarationFix
 import org.elm.lang.core.psi.ElmFile
 import org.elm.lang.core.psi.ElmPsiElement
 import org.elm.lang.core.psi.elements.ElmImportClause
-import org.elm.lang.core.psi.elements.ElmTypeAnnotation
 import org.elm.lang.core.psi.elements.ElmTypeRef
 import org.elm.lang.core.psi.elements.ElmValueExpr
 import org.elm.lang.core.resolve.reference.*
@@ -37,7 +34,6 @@ class ElmUnresolvedReferenceInspection : ElmLocalInspection() {
 
         for (ref in refs.filter { it.resolve() == null }) {
             // Give each handler a chance to deal with the unresolved ref before falling back on an error
-            if (handleTypeAnnotation(ref, element, holder)) continue
             if (handleSafeToIgnore(ref, element, holder)) continue
             if (handleModuleHiddenByAlias(ref, element, holder)) continue
 
@@ -56,19 +52,6 @@ class ElmUnresolvedReferenceInspection : ElmLocalInspection() {
             if (AddQualifierFix(element).isAvailable) fixes += AddQualifierFix(element)
             holder.registerProblem(element, description, LIKE_UNKNOWN_SYMBOL, errorRange, *fixes.toTypedArray())
         }
-    }
-
-    private fun handleTypeAnnotation(ref: PsiReference, element: PsiElement, holder: ProblemsHolder): Boolean {
-        if (element !is ElmTypeAnnotation) return false
-
-        val description = "'${ref.canonicalText}' does not exist"
-        val fixes = when {
-            MakeDeclarationFix(element).isAvailable -> arrayOf(MakeDeclarationFix(element))
-            else -> emptyArray()
-        }
-        holder.registerProblem(element, description, WEAK_WARNING, *fixes)
-
-        return true
     }
 
     private fun handleSafeToIgnore(ref: PsiReference, element: PsiElement, @Suppress("UNUSED_PARAMETER") holder: ProblemsHolder): Boolean {

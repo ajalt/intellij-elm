@@ -7,7 +7,6 @@ import com.intellij.usages.rules.PsiElementUsage
 import org.elm.lang.core.psi.ElmFile
 import org.elm.lang.core.psi.elements.ElmImportClause
 import org.elm.lang.core.psi.elements.ElmModuleDeclaration
-import org.elm.lang.core.psi.elements.ElmTypeAnnotation
 import org.elm.lang.core.psi.parentOfType
 
 /**
@@ -18,7 +17,6 @@ class ElmImportFilteringRule : ImportFilteringRule() {
         val element = (usage as? PsiElementUsage)?.element
         return element?.containingFile !is ElmFile
                 || (element.parentOfType<ElmImportClause>() == null
-                && element.parentOfType<ElmModuleDeclaration>() == null
-                && element !is ElmTypeAnnotation)
+                && element.parentOfType<ElmModuleDeclaration>() == null)
     }
 }

@@ -6,12 +6,12 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import org.elm.lang.core.imports.ImportAdder
 import org.elm.lang.core.psi.ElmFile
-import org.elm.lang.core.psi.elements.ElmTypeAnnotation
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 import org.elm.lang.core.psi.endOffset
 import org.elm.lang.core.psi.parentOfType
 import org.elm.lang.core.psi.startOffset
 import org.elm.lang.core.types.Ty
-import org.elm.lang.core.types.typeExpressionInference
+import org.elm.lang.core.types.findInference
 import org.elm.openapiext.runWriteCommandAction
 import org.elm.utils.getIndent
 
@@ -22,17 +22,17 @@ abstract class AnnotationBasedGeneratorIntention : ElmAtCaretIntentionActionBase
 
     override fun findApplicableContext(project: Project, editor: Editor, element: PsiElement): Context? {
         val file = element.containingFile as? ElmFile ?: return null
-        val typeAnnotation = element.parentOfType<ElmTypeAnnotation>()
+        val declaration = element.parentOfType<ElmValueDeclaration>()
                 ?: return null
 
-        if (typeAnnotation.reference.resolve() != null) {
+        if (declaration.functionIdentifier != null) {
             // the target declaration already exists; nothing to do
             return null
         }
 
-        val ty = typeAnnotation.typeExpressionInference()?.ty ?: return null
+        val ty = declaration.findInference()?.ty ?: return null
         val root = getRootIfApplicable(ty) ?: return null
-        return Context(file, root, typeAnnotation.referenceName, typeAnnotation.startOffset, typeAnnotation.endOffset)
+        return Context(file, root, declaration.name, declaration.startOffset, declaration.endOffset)
     }
 
     /** If the intention applies to the type of this annotation, return the [Ty] to use as [Context.ty]. */

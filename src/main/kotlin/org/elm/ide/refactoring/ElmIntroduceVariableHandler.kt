@@ -18,7 +18,7 @@ import org.elm.lang.core.psi.*
 import org.elm.lang.core.psi.elements.ElmAnonymousFunctionExpr
 import org.elm.lang.core.psi.elements.ElmCaseOfBranch
 import org.elm.lang.core.psi.elements.ElmLetInExpr
-import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 import org.elm.lang.core.textWithNormalizedIndents
 import org.elm.openapiext.runWriteCommandAction
 
@@ -54,7 +54,7 @@ class ElmIntroduceVariableHandler : RefactoringActionHandler {
             // Suggest nested expressions at caret position
             val expr = findExpressionAtCaret(file, editor.caretModel.offset) ?: return emptyList()
             expr.ancestors
-                    .takeWhile { it !is ElmValueDeclarationOld && it !is ElmLetInExpr }
+                    .takeWhile { it !is ElmValueDeclaration && it !is ElmLetInExpr }
                     .filterIsInstance<ElmExpressionTag>()
                     .toList()
         }
@@ -78,7 +78,7 @@ class ElmIntroduceVariableHandler : RefactoringActionHandler {
         while (current != null) {
             when {
                 current is ElmLetInExpr -> return current
-                current is ElmValueDeclarationOld -> return current.expression
+                current is ElmValueDeclaration -> return current.expression
                 current is ElmCaseOfBranch -> return current.expression
                 current is ElmAnonymousFunctionExpr -> {
                     if (current.expression in chosenExpr.ancestors) return current.expression
@@ -170,7 +170,7 @@ private class ExpressionReplacer(
         //       to the newly introduced identifier, and finally trigger
         //       inplace rename on the inserted variable.
         PsiDocumentManager.getInstance(project).performWhenAllCommitted {
-            val newDecl = file.findElementAt(offsetOfNewDecl)?.parentOfType<ElmValueDeclarationOld>()
+            val newDecl = file.findElementAt(offsetOfNewDecl)?.parentOfType<ElmValueDeclaration>()
             moveEditorToNameElement(editor, newDecl)?.let {
                 ElmInplaceVariableIntroducer(it, editor, project, "choose a name", emptyArray())
                         .performInplaceRefactoring(suggestedNames.all)

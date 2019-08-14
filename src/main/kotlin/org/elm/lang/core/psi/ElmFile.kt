@@ -65,16 +65,13 @@ class ElmFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, ElmLan
             stubDirectChildrenOfType<ElmImportClause>()
 
     fun getValueDeclarations() =
-            stubDirectChildrenOfType<ElmValueDeclarationOld>()
+            stubDirectChildrenOfType<ElmDeclarationTag>()
 
     fun getTypeDeclarations() =
             stubDirectChildrenOfType<ElmTypeDeclaration>()
 
     fun getTypeAliasDeclarations() =
             stubDirectChildrenOfType<ElmTypeAliasDeclaration>()
-
-    fun getTypeAnnotations() =
-            stubDirectChildrenOfType<ElmTypeAnnotation>()
 
     fun getPortAnnotations() =
             stubDirectChildrenOfType<ElmPortAnnotation>()

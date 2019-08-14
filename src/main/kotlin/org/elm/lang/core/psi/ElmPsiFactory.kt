@@ -137,7 +137,7 @@ class ElmPsiFactory(private val project: Project) {
 
     fun createCaseOfBranches(indent: String, patterns: List<String>): List<ElmCaseOfBranch> =
             patterns.joinToString("\n\n$indent", prefix = "foo = case 1 of\n\n$indent") { "$it ->\n$indent    " }
-                    .let { createFromText<ElmValueDeclarationOld>(it) }
+                    .let { createFromText<ElmValueDeclaration>(it) }
                     ?.descendantOfType<ElmCaseOfExpr>()?.branches
                     ?: error("Failed to create case of branches from $patterns")
 
@@ -153,7 +153,7 @@ class ElmPsiFactory(private val project: Project) {
         |${indent}in
         |${indent}$bodyText
         """.trimMargin()
-        return createFromText<ElmValueDeclarationOld>(code)
+        return createFromText<ElmValueDeclaration>(code)
                 ?.descendantOfType()
                 ?: error("Failed to create let/in wrapper")
     }

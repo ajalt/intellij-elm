@@ -6,8 +6,7 @@ import com.intellij.psi.util.CachedValueProvider.Result
 import com.intellij.psi.util.CachedValuesManager
 import org.elm.lang.core.psi.ElmFile
 import org.elm.lang.core.psi.ElmNamedElement
-import org.elm.lang.core.psi.elements.ElmImportClause
-import org.elm.lang.core.psi.elements.ElmTypeDeclaration
+import org.elm.lang.core.psi.elements.*
 import org.elm.lang.core.psi.modificationTracker
 
 private val DECLARED_VALUES_KEY: Key<CachedValue<List<ElmNamedElement>>> = Key.create("DECLARED_VALUES_KEY")
@@ -112,7 +111,12 @@ object ModuleScope {
     fun getDeclaredValues(elmFile: ElmFile): List<ElmNamedElement> {
         return CachedValuesManager.getCachedValue(elmFile, DECLARED_VALUES_KEY) {
             val valueDecls = elmFile.getValueDeclarations().flatMap {
-                it.declaredNames(includeParameters = false)
+                when(it) {
+                    is ElmDestructuringDeclaration -> it.declaredNames()
+                    is ElmValueDeclaration -> listOf(it)
+                    is ElmOperatorDeclaration -> it.declaredNames(includeParameters = false)
+                    else -> error("unexpected declaration: $it")
+                }
             }
             val values = listOf(valueDecls, elmFile.getPortAnnotations(), elmFile.getInfixDeclarations())
                     .flatten()

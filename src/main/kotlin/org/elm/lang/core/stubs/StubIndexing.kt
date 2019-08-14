@@ -10,10 +10,6 @@ fun IndexSink.indexModuleDecl(stub: ElmModuleDeclarationStub) {
     ElmModulesIndex.index(stub, this)
 }
 
-fun IndexSink.indexFuncDecl(stub: ElmFunctionDeclarationLeftStub) {
-    indexNamedStub(stub)
-}
-
 fun IndexSink.indexValueDecl(stub: ElmValueDeclarationStub) {
     indexNamedStub(stub)
 }

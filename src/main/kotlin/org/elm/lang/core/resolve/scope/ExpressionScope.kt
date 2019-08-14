@@ -4,10 +4,7 @@ import com.intellij.psi.PsiElement
 import org.elm.lang.core.psi.ElmFile
 import org.elm.lang.core.psi.ElmNamedElement
 import org.elm.lang.core.psi.ancestors
-import org.elm.lang.core.psi.elements.ElmAnonymousFunctionExpr
-import org.elm.lang.core.psi.elements.ElmCaseOfBranch
-import org.elm.lang.core.psi.elements.ElmLetInExpr
-import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
+import org.elm.lang.core.psi.elements.*
 
 
 class ExpressionScope(val element: PsiElement) {
@@ -26,7 +23,7 @@ class ExpressionScope(val element: PsiElement) {
                 results.add(it)
             }
 
-            if (it is ElmValueDeclarationOld) {
+            if (it is ElmValueDeclaration) {
                 results.addAll(it.declaredNames())
             }
 

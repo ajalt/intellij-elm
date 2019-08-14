@@ -5,7 +5,7 @@ import com.intellij.navigation.ItemPresentation
 import com.intellij.psi.PsiElement
 import org.elm.lang.core.psi.ElmNamedElement
 import org.elm.lang.core.psi.ElmPsiElement
-import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 
 
 fun getPresentation(psi: ElmPsiElement): ItemPresentation {
@@ -28,7 +28,7 @@ private fun presentableName(element: PsiElement): String? =
             is ElmNamedElement ->
                 element.name
 
-            is ElmValueDeclarationOld ->
+            is ElmValueDeclaration ->
                 element.declaredNames(includeParameters = false).firstOrNull()?.name
 
             else ->

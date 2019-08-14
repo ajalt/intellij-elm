@@ -1,5 +1,7 @@
 package org.elm.lang.core.psi
 
+import com.intellij.psi.StubBasedPsiElement
+import com.intellij.psi.stubs.StubElement
 import org.elm.lang.core.psi.elements.*
 /**
  * An element that is at least one of [ElmUnionVariantParameterTag], [ElmTypeExpressionSegmentTag],
@@ -24,7 +26,7 @@ interface ElmOperandTag : ElmPsiElement, ElmBinOpPartTag
 /** An element that can occur in a binary operator expression */
 interface ElmBinOpPartTag : ElmPsiElement
 
-/** An element that can be the parameter of an [ElmFunctionDeclarationLeft], [ElmAnonymousFunctionExpr], or [ElmCaseOfBranch] */
+/** An element that can be the parameter of an [ElmValueDeclaration], [ElmAnonymousFunctionExpr], or [ElmCaseOfBranch] */
 interface ElmNameDeclarationPatternTag : ElmNameIdentifierOwner
 
 /** A function being called as the child of a [ElmFunctionCallExpr] */
@@ -33,7 +35,7 @@ interface ElmFunctionCallTargetTag : ElmAtomTag
 /** An element that is either an [ElmFunctionParamTag], a [ElmPatternChildTag], or both. No elements implement this directly. */
 interface ElmFunctionParamOrPatternChildTag : ElmPsiElement
 
-/** An element that can be a top-level parameter to a [ElmFunctionDeclarationLeft] or [ElmOperatorDeclarationLeft] */
+/** An element that can be a top-level parameter to a [ElmValueDeclaration] or [ElmOperatorDeclaration] */
 interface ElmFunctionParamTag : ElmFunctionParamOrPatternChildTag
 
 /** An element that can be the direct child of an [ElmPattern] */
@@ -58,7 +60,10 @@ interface ElmFieldAccessTargetTag : ElmPsiElement
 interface ElmExposedItemTag : ElmPsiElement
 
 /** A named declaration which can be exposed by a module */
-interface ElmExposableTag : ElmPsiElement, ElmNameIdentifierOwner
+interface ElmExposableTag : ElmNameIdentifierOwner
 
 /** The element on the left side of the `=` in a value declaration */
 interface ElmValueAssigneeTag : ElmPsiElement
+
+/** A declaration, either top-level or nested */
+interface ElmDeclarationTag: ElmPsiElement

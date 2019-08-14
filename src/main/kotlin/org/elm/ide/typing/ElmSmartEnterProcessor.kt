@@ -47,7 +47,7 @@ class ElmSmartEnterProcessor : SmartEnterProcessorWithFixers() {
                             || it is ElmCaseOfExpr
                             || it is ElmLetInExpr
                             || it is ElmIfElseExpr
-                            || it is ElmValueDeclarationOld
+                            || it is ElmValueDeclaration
                 }
     }
 }
@@ -71,7 +71,7 @@ private class ElmEnterProcessor : SmartEnterProcessorWithFixers.FixEnterProcesso
                 atCaret.thenKeywords.last()
             }
             indentAfterElement(editor, anchor, atCaret.elseKeywords.last())
-        } else if (modified && atCaret is ElmValueDeclarationOld && atCaret.eqElement != null) {
+        } else if (modified && atCaret is ElmValueDeclaration && atCaret.eqElement != null) {
             indentAfterElement(editor, atCaret.eqElement!!, atCaret)
         } else {
             plainEnter(editor)

@@ -2,8 +2,8 @@ package org.elm.ide.intentions
 
 import org.elm.lang.core.imports.ImportAdder.Import
 import org.elm.lang.core.psi.ElmFile
-import org.elm.lang.core.psi.elements.ElmFunctionDeclarationLeft
 import org.elm.lang.core.psi.elements.ElmImportClause
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 import org.elm.lang.core.resolve.scope.ModuleScope
 import org.elm.lang.core.types.AliasInfo
 import org.elm.lang.core.types.DeclarationInTy
@@ -108,7 +108,7 @@ abstract class TyFunctionGenerator(
         if (ty in callablesByTy) return callablesByTy[ty]!!
 
         ModuleScope.getReferencableValues(file).all
-                .filterIsInstance<ElmFunctionDeclarationLeft>()
+                .filterIsInstance<ElmValueDeclaration>()
                 .forEach {
                     val t = it.findTy()
                     if (t != null && isExistingFunction(ty, t)) {

@@ -62,7 +62,6 @@ fun factory(name: String): ElmStubElementType<*, *> = when (name) {
     "TYPE_DECLARATION" -> ElmTypeDeclarationStub.Type
     "TYPE_ALIAS_DECLARATION" -> ElmTypeAliasDeclarationStub.Type
     "UNION_VARIANT" -> ElmUnionVariantStub.Type
-    "FUNCTION_DECLARATION_LEFT" -> ElmFunctionDeclarationLeftStub.Type
     "OPERATOR_DECLARATION" -> ElmOperatorDeclarationStub.Type  // TODO [drop 0.18] remove this line
     "INFIX_DECLARATION" -> ElmInfixDeclarationStub.Type
     "INFIX_FUNC_REF" -> ElmPlaceholderRefStub.Type(name, ::ElmInfixFuncRef)
@@ -83,7 +82,6 @@ fun factory(name: String): ElmStubElementType<*, *> = when (name) {
     "TYPE_VARIABLE" -> ElmTypeVariableStub.Type
     "LOWER_TYPE_NAME" -> ElmLowerTypeNameStub.Type
     "RECORD_BASE_IDENTIFIER" -> ElmPlaceholderRefStub.Type(name, ::ElmRecordBaseIdentifier)
-    "TYPE_ANNOTATION" -> ElmPlaceholderRefStub.Type(name, ::ElmTypeAnnotation)
     "IMPORT_CLAUSE" -> ElmPlaceholderStub.Type(name, ::ElmImportClause)
     "AS_CLAUSE" -> ElmAsClauseStub.Type
     "UPPER_CASE_QID" -> ElmUpperCaseQIDStub.Type
@@ -214,35 +212,6 @@ class ElmUnionVariantStub(
     }
 }
 
-class ElmFunctionDeclarationLeftStub(
-        parent: StubElement<*>?,
-        elementType: IStubElementType<*, *>,
-        override val name: String
-) : StubBase<ElmFunctionDeclarationLeft>(parent, elementType), ElmNamedStub {
-
-    object Type : ElmStubElementType<ElmFunctionDeclarationLeftStub, ElmFunctionDeclarationLeft>("FUNCTION_DECLARATION_LEFT") {
-
-        override fun serialize(stub: ElmFunctionDeclarationLeftStub, dataStream: StubOutputStream) =
-                with(dataStream) {
-                    writeName(stub.name)
-                }
-
-        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
-                ElmFunctionDeclarationLeftStub(parentStub, this,
-                        dataStream.readNameString() ?: error("expected non-null string"))
-
-        override fun createPsi(stub: ElmFunctionDeclarationLeftStub) =
-                ElmFunctionDeclarationLeft(stub, this)
-
-        override fun createStub(psi: ElmFunctionDeclarationLeft, parentStub: StubElement<*>?) =
-                ElmFunctionDeclarationLeftStub(parentStub, this, psi.name)
-
-        override fun indexStub(stub: ElmFunctionDeclarationLeftStub, sink: IndexSink) {
-            sink.indexFuncDecl(stub)
-        }
-    }
-}
-
 class ElmValueDeclarationStub(
         parent: StubElement<*>?,
         elementType: IStubElementType<*, *>,
@@ -277,9 +246,9 @@ class ElmOperatorDeclarationStub(
         parent: StubElement<*>?,
         elementType: IStubElementType<*, *>,
         override val name: String
-) : StubBase<ElmOperatorDeclarationLeft>(parent, elementType), ElmNamedStub {
+) : StubBase<ElmOperatorDeclaration>(parent, elementType), ElmNamedStub {
 
-    object Type : ElmStubElementType<ElmOperatorDeclarationStub, ElmOperatorDeclarationLeft>("OPERATOR_DECLARATION") {
+    object Type : ElmStubElementType<ElmOperatorDeclarationStub, ElmOperatorDeclaration>("OPERATOR_DECLARATION") {
 
         override fun serialize(stub: ElmOperatorDeclarationStub, dataStream: StubOutputStream) =
                 with(dataStream) {
@@ -291,9 +260,9 @@ class ElmOperatorDeclarationStub(
                         dataStream.readNameString() ?: error("expected non-null string"))
 
         override fun createPsi(stub: ElmOperatorDeclarationStub) =
-                ElmOperatorDeclarationLeft(stub, this)
+                ElmOperatorDeclaration(stub, this)
 
-        override fun createStub(psi: ElmOperatorDeclarationLeft, parentStub: StubElement<*>?) =
+        override fun createStub(psi: ElmOperatorDeclaration, parentStub: StubElement<*>?) =
                 ElmOperatorDeclarationStub(parentStub, this, psi.name)
 
         override fun indexStub(stub: ElmOperatorDeclarationStub, sink: IndexSink) {

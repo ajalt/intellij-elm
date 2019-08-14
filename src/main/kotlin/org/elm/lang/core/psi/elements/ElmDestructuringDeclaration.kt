@@ -2,10 +2,8 @@ package org.elm.lang.core.psi.elements
 
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.SimpleModificationTracker
-import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.util.PsiTreeUtil
 import org.elm.ide.icons.ElmIcons
 import org.elm.lang.core.psi.*
 import org.elm.lang.core.stubs.ElmPlaceholderStub
@@ -17,7 +15,8 @@ import org.elm.lang.core.stubs.ElmPlaceholderStub
  * e.g. `(x, y) = (0, 0)`
  */
 // In Elm 0.19, this is only valid inside a let block
-class ElmDestructuringDeclaration : ElmStubbedElement<ElmPlaceholderStub> {
+class ElmDestructuringDeclaration : ElmStubbedElement<ElmPlaceholderStub>,
+        ElmDeclarationTag {
 
     constructor(node: ASTNode) :
             super(node)

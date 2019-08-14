@@ -5,14 +5,11 @@ import com.intellij.codeInsight.daemon.LineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.psi.PsiElement
 import org.elm.ide.icons.ElmIcons
-import org.elm.lang.core.psi.ElmExposableTag
-import org.elm.lang.core.psi.ElmFile
-import org.elm.lang.core.psi.ElmNameIdentifierOwner
+import org.elm.lang.core.psi.*
 import org.elm.lang.core.psi.ElmTypes.LOWER_CASE_IDENTIFIER
 import org.elm.lang.core.psi.ElmTypes.UPPER_CASE_IDENTIFIER
-import org.elm.lang.core.psi.elementType
-import org.elm.lang.core.psi.elements.ElmFunctionDeclarationLeft
 import org.elm.lang.core.psi.elements.ElmUnionVariant
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 import org.elm.lang.core.psi.elements.findMatchingItemFor
 
 /**
@@ -31,7 +28,7 @@ class ElmExposureLineMarkerProvider : LineMarkerProvider {
             is ElmUnionVariant ->
                 null
 
-            is ElmFunctionDeclarationLeft ->
+            is ElmValueDeclaration ->
                 if (!parentDecl.isTopLevel) null
                 else makeMarkerIfExposed(element, parentDecl)
 

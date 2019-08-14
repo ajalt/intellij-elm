@@ -24,15 +24,6 @@ foo x y =  x + y
 """)
 
 
-    fun `test type annotation refers to function name decl`() = checkByCode(
-"""
-addOne : Int -> Int
---^
-addOne x = x + 1
---X
-""")
-
-
     fun `test nested function parameter ref`() = checkByCode(
 """
 f x =
@@ -110,31 +101,5 @@ f x = g x
 f x = x
 g y = x
     --^unresolved
-""")
-
-    fun `test type annotation name ref`() = checkByCode(
-            """
-foo : Int -> Int
---^
-foo a = a
---X
-
-outer =
-    let
-        foo a = a
-    in foo
-""")
-
-    fun `test nested type annotation name ref`() = checkByCode(
-            """
-foo a = a
-
-outer =
-    let
-        foo : Int -> Int
-        --^
-        foo a = a
-        --X
-    in foo
 """)
 }

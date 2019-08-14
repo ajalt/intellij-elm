@@ -37,7 +37,7 @@ class ElmUnusedSymbolInspection : ElmLocalInspection() {
 
         // perform Find Usages
         val usages = ReferencesSearch.search(element).findAll()
-                .filterNot { it.element is ElmTypeAnnotation || it.element is ElmExposedItemTag }
+                .filterNot { it.element is ElmExposedItemTag }
 
         if (usages.isEmpty()) {
             markAsUnused(holder, element, name)
@@ -45,10 +45,9 @@ class ElmUnusedSymbolInspection : ElmLocalInspection() {
     }
 
     private fun isProgramEntryPoint(element: ElmNameIdentifierOwner): Boolean =
-            when {
-                element is ElmFunctionDeclarationLeft ->
-                    element.name == "main" || element.isElmTestEntryPoint()
-                element is ElmPortAnnotation -> isExposed(element)
+            when (element) {
+                is ElmValueDeclaration -> element.name == "main" || element.isElmTestEntryPoint()
+                is ElmPortAnnotation -> isExposed(element)
                 else -> false
             }
 
@@ -71,17 +70,16 @@ class ElmUnusedSymbolInspection : ElmLocalInspection() {
 }
 
 
-private fun ElmFunctionDeclarationLeft.isElmTestEntryPoint(): Boolean {
-    val decl = parentOfType<ElmValueDeclarationOld>() ?: return false
-    if (!decl.isTopLevel) return false
-    val typeAnnotation = decl.typeAnnotation ?: return false
+private fun ElmValueDeclaration.isElmTestEntryPoint(): Boolean {
+    if (!isTopLevel) return false
+    val typeAnnotation = typeAnnotation ?: return false
 
     // HACK: string suffix match is very naive, but it's cheap and easy to test.
     // The right thing to do would be to verify that the type resolves to
     // a type declared in the `elm-test` package. But setting that up for
     // `ElmUnusedSymbolInspectionTest` is a pain.
     // TODO revisit this later
-    if (!typeAnnotation.text.endsWith(" : Test") && !typeAnnotation.text.endsWith(" : Test.Test"))
+    if (typeAnnotation.text != "Test" && typeAnnotation.text != "Test.Test")
         return false
 
     // The elm-test runner requires that the entry-point be exposed by the module

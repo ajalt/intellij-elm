@@ -36,8 +36,8 @@ class ElmRecursiveCallLineMarkerProvider : LineMarkerProvider {
             if (functionCall.target != valueExpr) continue
 
             val ref = valueExpr.reference.resolve()
-            val nearestFunc = functionCall.ancestorsStrict.filterIsInstance<ElmValueDeclarationOld>()
-                    .firstOrNull()?.functionDeclarationLeft
+            val nearestFunc = functionCall.ancestorsStrict.filterIsInstance<ElmValueDeclaration>()
+                    .firstOrNull()
             if (nearestFunc != ref) continue // not recursive
 
             val doc = PsiDocumentManager.getInstance(el.project).getDocument(el.containingFile) ?: continue

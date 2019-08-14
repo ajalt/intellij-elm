@@ -12,8 +12,7 @@ import com.intellij.psi.PsiWhiteSpace
 import org.elm.lang.core.ElmLanguage
 import org.elm.lang.core.psi.*
 import org.elm.lang.core.psi.ElmTypes.VIRTUAL_END_DECL
-import org.elm.lang.core.psi.elements.ElmTypeAnnotation
-import org.elm.lang.core.psi.elements.ElmValueDeclarationOld
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 
 class ElmInspectionSuppressor : InspectionSuppressor {
     companion object {
@@ -34,8 +33,7 @@ class ElmInspectionSuppressor : InspectionSuppressor {
         return prevSiblings.takeWhile {
             it is PsiWhiteSpace ||
                     it is PsiComment ||
-                    it.elementType == VIRTUAL_END_DECL ||
-                    this is ElmValueDeclarationOld && it is ElmTypeAnnotation
+                    it.elementType == VIRTUAL_END_DECL
         }.filterIsInstance<PsiComment>().any { comment ->
             val match = SUPPRESS_REGEX.matchEntire(comment.text)
             match != null && SuppressionUtil.isInspectionToolIdMentioned(match.groupValues[1], toolId)
@@ -59,7 +57,7 @@ class ElmInspectionSuppressor : InspectionSuppressor {
         }
 
         override fun createSuppression(project: Project, element: PsiElement, container: PsiElement) {
-            val anchor = (container as? ElmValueDeclarationOld)?.typeAnnotation ?: container
+            val anchor = (container as? ElmValueDeclaration)?.typeAnnotation ?: container
             val text = SuppressionUtilCore.SUPPRESS_INSPECTIONS_TAG_NAME + " " + myID
             val comment = SuppressionUtil.createComment(project, text + "\n", ElmLanguage)
             val parent = anchor.parent

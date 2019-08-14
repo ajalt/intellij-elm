@@ -17,7 +17,7 @@ import org.elm.lang.core.ElmFileType
 import org.elm.lang.core.lookup.ClientLocation
 import org.elm.lang.core.lookup.ElmLookup
 import org.elm.lang.core.psi.ElmFile
-import org.elm.lang.core.psi.elements.ElmFunctionDeclarationLeft
+import org.elm.lang.core.psi.elements.ElmValueDeclaration
 import org.elm.lang.core.types.*
 import org.elm.openapiext.isUnitTestMode
 import org.elm.openapiext.pathAsPath
@@ -80,8 +80,8 @@ class ElmBuildAction : AnAction() {
         ToolWindowManager.getInstance(project).getToolWindow("Elm Compiler").show(null)
     }
 
-    private fun findMainEntryPoint(project: Project, elmProject: ElmProject): ElmFunctionDeclarationLeft? =
-            ElmLookup.findByName<ElmFunctionDeclarationLeft>("main", LookupClientLocation(project, elmProject))
+    private fun findMainEntryPoint(project: Project, elmProject: ElmProject): ElmValueDeclaration? =
+            ElmLookup.findByName<ElmValueDeclaration>("main", LookupClientLocation(project, elmProject))
                     .find { decl ->
                         val key = when (val ty = decl.findTy()) {
                             is TyUnion -> ty.module to ty.name

@@ -11,6 +11,7 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.testFramework.utils.inlays.InlayHintsChecker.Companion.pattern
 import org.elm.lang.core.psi.ElmFile
 import org.elm.lang.core.psi.ElmTypes.*
 import org.elm.lang.core.psi.directChildren
@@ -74,8 +75,8 @@ private class ElmFoldingVisitor : PsiElementVisitor() {
             is ElmRecordType, is ElmRecordExpr -> {
                 fold(element)
             }
-            is ElmValueDeclarationOld -> {
-                foldToEnd(element) { functionDeclarationLeft ?: pattern ?: operatorDeclarationLeft }
+            is ElmValueDeclaration -> {
+                foldToEnd(element) { typeAnnotationIdentifier ?: functionIdentifier }
             }
             is ElmTypeDeclaration -> {
                 foldToEnd(element) { lowerTypeNameList.lastOrNull() ?: nameIdentifier }

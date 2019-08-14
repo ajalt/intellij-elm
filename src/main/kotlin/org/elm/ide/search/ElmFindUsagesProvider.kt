@@ -38,7 +38,7 @@ class ElmFindUsagesProvider : FindUsagesProvider {
         return when (element) {
             is ElmModuleDeclaration -> "Module"
             is ElmAsClause -> "Aliased Module Import"
-            is ElmFunctionDeclarationLeft -> "Value/Function Declaration"
+            is ElmValueDeclaration -> "Value/Function Declaration"
             is ElmInfixDeclaration -> "Infix Operator Declaration"
             is ElmTypeAliasDeclaration -> "Type Alias"
             is ElmTypeDeclaration -> "Union Type"

@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement
 import org.elm.lang.core.psi.ElmExposableTag
 import org.elm.lang.core.psi.ElmFile
 import org.elm.lang.core.psi.elements.*
+import org.elm.lang.core.psi.isTopLevel
 
 /**
  * An intention action that adds a function/type to a module's `exposing` list.
@@ -32,7 +33,7 @@ class AddExposureIntention : ElmAtCaretIntentionActionBase<AddExposureIntention.
                 null
             }
 
-            decl is ElmFunctionDeclarationLeft && !decl.isTopLevel ->
+            decl is ElmValueDeclaration && !decl.isTopLevel ->
                 null
 
             !exposingList.exposes(decl) ->

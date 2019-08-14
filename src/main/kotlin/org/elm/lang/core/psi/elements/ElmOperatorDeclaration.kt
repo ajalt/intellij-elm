@@ -8,12 +8,13 @@ import org.elm.ide.icons.ElmIcons
 import org.elm.lang.core.psi.*
 import org.elm.lang.core.stubs.ElmOperatorDeclarationStub
 
+// TODO [drop 0.18] delete this whole file
 
 /**
  * A top-level operator declaration. 0.18 only
  */
-// TODO [drop 0.18] remove this element
-class ElmOperatorDeclaration : ElmStubbedNamedElementImpl<ElmOperatorDeclarationStub>, ElmExposableTag {
+class ElmOperatorDeclaration : ElmStubbedNamedElementImpl<ElmOperatorDeclarationStub>,
+        ElmExposableTag, ElmDeclarationTag {
 
     constructor(node: ASTNode) :
             super(node, IdentifierCase.OPERATOR)
