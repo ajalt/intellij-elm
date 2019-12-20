@@ -114,6 +114,10 @@ class ElmPsiFactory(private val project: Project) {
             createFromText("f = $text")
                     ?: error("Invalid value QID: `$text`")
 
+    fun createStringConstant(text: String): ElmStringConstantExpr =
+            createFromText("f = $text")
+                    ?: error("Invalid string: `$text`")
+
     fun createAnythingPattern(): ElmAnythingPattern =
             createFromText("f _ = 1")
                     ?: error("Invalid anything pattern")
