@@ -2,6 +2,7 @@ package org.elm.ide.color
 
 import com.github.ajalt.colormath.ColorMath
 import com.github.ajalt.colormath.ConvertibleColor
+import com.github.ajalt.colormath.HSL
 import com.github.ajalt.colormath.RGB
 import com.intellij.ide.IdeBundle
 import com.intellij.openapi.command.CommandProcessor
@@ -13,6 +14,7 @@ import org.elm.lang.core.psi.ElmTypes.REGULAR_STRING_PART
 import org.elm.lang.core.psi.elementType
 import org.elm.lang.core.psi.elements.ElmStringConstantExpr
 import java.awt.Color
+import kotlin.math.PI
 import kotlin.math.roundToInt
 
 private val colorRegex = Regex("""#[0-9a-fA-F]{3,8}\b|\b(?:rgb|hsl)a?\([^)]+\)""")
@@ -58,15 +60,14 @@ class ElmColorProvider : ElementColorProvider {
         val parent = element.parent as? ElmStringConstantExpr ?: return
         val match = colorRegex.find(element.text)?.value ?: return
         val rgb = RGB(color.red, color.green, color.blue, color.alpha / 255f)
+
         fun renderFunc(name: String, colors: List<String>, alphaPercent: Boolean): String {
             val colorSep = if (',' in match) ", " else " "
             val alphaSep = if (',' in match) ", " else " / "
             var args = colors.joinToString(colorSep)
             val alpha = when {
                 alphaPercent -> "${(rgb.a * 100).roundToInt()}%"
-                else -> if (rgb.a == 1f) "1" else  rgb.a.toString().let {
-                    it.take(it.indexOf('.') + 2)
-                }
+                else -> rgb.a.render()
             }
             if (rgb.a != 1f || name == "rgba") args += "$alphaSep$alpha"
             return "$name($args)"
@@ -76,25 +77,29 @@ class ElmColorProvider : ElementColorProvider {
             match.startsWith('#') -> rgb.toHex(withNumberSign = true) + if (rgb.a == 1f) "" else {
                 (rgb.a * 255).roundToInt().toString(16).padStart(2, '0')
             }
-            match.startsWith("rgb") -> {
-                val name = if (match.startsWith("rgba")) "rgba" else "rgb"
-                val colorPercents = match.count { it == '%' } > 1
-                val alphaPercent = match.count { it == '%' }.let { it == 1 || it == 4 }
-
-                fun render(i: Int) = when {
-                    colorPercents -> "${(i * 100 / 255f).roundToInt()}%"
-                    else -> i.toString()
-                }
-
-                renderFunc(name, listOf(rgb.r, rgb.g, rgb.b).map { render(it) }, alphaPercent)
-            }
+            match.startsWith("rgb") -> renderFunc(
+                    name = if (match.startsWith("rgba")) "rgba" else "rgb",
+                    colors = listOf(rgb.r, rgb.g, rgb.b).map { n ->
+                        when {
+                            match.count { it == '%' } > 1 -> "${(n * 100 / 255f).roundToInt()}%"
+                            else -> n.toString()
+                        }
+                    },
+                    alphaPercent = match.count { it == '%' }.let { it == 1 || it == 4 }
+            )
             match.startsWith("hsl") -> {
-                val hsl = rgb.toHSL()
-                val name = if (match.startsWith("hsla")) "hsla" else "hsl"
-                val colorSep = if (',' in match) ", " else " "
-                val alphaSep = if (',' in match) ", " else " / "
-
-                "TODO"
+                val (h, s, l) = rgb.toHSL()
+                val hue = when {
+                    "grad" in match -> "${h.asGrad().render()}grad"
+                    "rad" in match -> "${h.asRad().render()}rad"
+                    "turn" in match -> "${h.asTurns().render()}turn"
+                    else -> h.toString()
+                }
+                renderFunc(
+                        name = if (match.startsWith("hsla")) "hsla" else "hsl",
+                        colors = listOf(hue, "$s%", "$l%"),
+                        alphaPercent = match.count { it == '%' } in listOf(1, 3)
+                )
             }
             else -> return
         }
@@ -108,4 +113,13 @@ class ElmColorProvider : ElementColorProvider {
 
 fun ConvertibleColor.toAwtColor(): Color = toRGB().let {
     Color(it.r, it.g, it.b, (it.a * 255).roundToInt())
+}
+
+private fun Int.asGrad(): Float = this * 200 / 180f
+private fun Int.asRad(): Float = (this * PI / 180).toFloat()
+private fun Int.asTurns(): Float = this / 360f
+private fun Float.render(): String = when {
+    this == 1f -> "1"
+    this == 0f -> "0"
+    else -> String.format("%.2f", this).trim('0')
 }
