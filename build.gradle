@@ -137,6 +137,7 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compileOnly "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    compile 'com.github.ajalt:colormath:1.3.0'
     compile("org.jetbrains:markdown:$markdownVersion") {
         exclude module: "kotlin-runtime"
         exclude module: "kotlin-stdlib"
