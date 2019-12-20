@@ -7,15 +7,12 @@ import org.intellij.lang.annotations.Language
 
 // TODO: ElmLineMarkerProviderTestBase?
 internal class ElmColorProviderTest : ElmTestBase() {
-    fun `test qualified value`() = doTest("""
+    fun `test value with other string content`() = doTest("""
 import Html.Attributes
  
 main =
-    Html.Attributes.style "color" "#aabbcc"
+    Html.Attributes.style "border" "1px solid #aabbcc"
 """)
-    fun `test color name red`() = doFormatTest("red")
-    fun `test color name rebeccapurple`() = doFormatTest("rebeccapurple")
-
 
     // format test cases from https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
 
