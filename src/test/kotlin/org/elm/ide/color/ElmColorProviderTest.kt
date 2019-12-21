@@ -9,7 +9,6 @@ import org.elm.lang.ElmTestBase
 import org.intellij.lang.annotations.Language
 
 
-// TODO: ElmLineMarkerProviderTestBase?
 internal class ElmColorProviderTest : ElmTestBase() {
     fun `test value with other string content`() = doGutterTest("""
 main = ("border", "1px solid #aabbcc")
@@ -58,20 +57,20 @@ main = ("border", "1px solid #aabbcc")
     fun `test write rgb(255 0 153)`() = doWriteFormatTest("rgb(255 0 153)", "rgb(123 45 67)")
     fun `test write #f090`() = doWriteFormatTest("#f090", "#7b2d4300", RGB(123, 45, 67, 0f))
     fun `test write #ff009900`() = doWriteFormatTest("#ff00990", "#7b2d4300", RGB(123, 45, 67, 0f))
-    fun `test write rgba(255, 0, 153, 1)`() = doWriteFormatTest("rgba(255, 0, 153, 1)", "rgba(123, 45, 67, 1)")
+    fun `test write rgba(255, 0, 153, 1)`() = doWriteFormatTest("rgba(255, 0, 153, 1)", "rgba(123, 45, 67)")
     fun `test write rgb(255, 0, 153, 100%)`() = doWriteFormatTest("rgb(255, 0, 153, 100%)", "rgb(123, 45, 67, 50%)", RGB(123, 45, 67, .5f))
-    fun `test write rgb(255 0 153 _ 1)`() = doWriteFormatTest("rgb(255 0 153 / 1)", "rgb(123 45 67 / .5)", RGB(123, 45, 67, .5f))
+    fun `test write rgb(255 0 153 _ 1)`() = doWriteFormatTest("rgb(255 0 153 / 1)", "rgb(123 45 67 / .2)", RGB(123, 45, 67, .2f))
     fun `test write rgb(255 0 153 _ 100%)`() = doWriteFormatTest("rgb(255 0 153 / 100%)", "rgb(123 45 67 / 50%)", RGB(123, 45, 67, .5f))
-    fun `test write hsl(270,60%,70%)`() = doWriteFormatTest("hsl(270,60%,70%)","hsl(123, 45%, 67%, .5)", HSL(123, 45, 67, .5f))
+    fun `test write hsl(270,60%,70%)`() = doWriteFormatTest("hsl(270,60%,70%)","hsl(123, 45%, 67%, .2)", HSL(123, 45, 67, .2f))
     fun `test write hsl(270, 60%, 70%)`() = doWriteFormatTest("hsl(270, 60%, 70%)","hsl(123, 45%, 67%)", HSL(123, 45, 67))
     fun `test write hsl(270 60% 70%)`() = doWriteFormatTest("hsl(270 60% 70%)","hsl(123 45% 67%)", HSL(123, 45, 67))
-    fun `test write hsl(270, 60%, 50%, _15)`() = doWriteFormatTest("hsl(270, 60%, 50%, .15)","hsl(123, 45%, 67%, .5)", HSL(123, 45, 67, .5f))
-    fun `test write hsl(270, 60%, 50%, 15%)`() = doWriteFormatTest("hsl(270, 60%, 50%, 15%)","hsl(123, 45%, 67%, 50%)", HSL(123, 45, 67, .5f))
-    fun `test write hsl(270 60% 50% _ _15)`() = doWriteFormatTest("hsl(270 60% 50% / .15)","hsl(123 45% 67% / .5)", HSL(123, 45, 67, .5f))
-    fun `test write hsl(270 60% 50% _ 15%)`() = doWriteFormatTest("hsl(270 60% 50% / 15%)","hsl(123 45% 67% / 50%)", HSL(123, 45, 67, .5f))
-    fun `test write hsl(270grad,60%,70%)`() = doWriteFormatTest("hsl(270grad,60%,70%)","hsl(136.67grad, 45%, 67%, .5)", HSL(123, 45, 67, .5f))
-    fun `test write hsl(270rad,60%,70%)`() = doWriteFormatTest("hsl(270rad,60%,70%)","hsl(2.15rad, 45%, 67%, .5)", HSL(123, 45, 67, .5f))
-    fun `test write hsl(270turn,60%,70%)`() = doWriteFormatTest("hsl(270turn,60%,70%)","hsl(.34turn, 45%, 67%, .5)", HSL(123, 45, 67, .5f))
+    fun `test write hsl(270, 60%, 50%, _15)`() = doWriteFormatTest("hsl(270, 60%, 50%, .15)","hsl(123, 45%, 67%, .2)", HSL(123, 45, 67, .2f))
+    fun `test write hsl(270, 60%, 50%, 15%)`() = doWriteFormatTest("hsl(270, 60%, 50%, 15%)","hsl(123, 45%, 67%, 20%)", HSL(123, 45, 67, .2f))
+    fun `test write hsl(270 60% 50% _ _15)`() = doWriteFormatTest("hsl(270 60% 50% / .15)","hsl(123 45% 67% / .2)", HSL(123, 45, 67, .2f))
+    fun `test write hsl(270 60% 50% _ 15%)`() = doWriteFormatTest("hsl(270 60% 50% / 15%)","hsl(123 45% 67% / 20%)", HSL(123, 45, 67, .2f))
+    fun `test write hsl(270grad,60%,70%)`() = doWriteFormatTest("hsl(270grad,60%,70%)","hsl(136.6667grad, 45%, 67%, .2)", HSL(123, 45, 67, .2f))
+    fun `test write hsl(270rad,60%,70%)`() = doWriteFormatTest("hsl(270rad,60%,70%)","hsl(2.1468rad, 45%, 67%, .2)", HSL(123, 45, 67, .2f))
+    fun `test write hsl(270turn,60%,70%)`() = doWriteFormatTest("hsl(270turn,60%,70%)","hsl(.3417turn, 45%, 67%, .2)", HSL(123, 45, 67, .2f))
 
 
     private fun doFormatTest(color: String) {
